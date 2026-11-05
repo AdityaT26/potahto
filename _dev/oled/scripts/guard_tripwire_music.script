@@ -28,6 +28,7 @@ tof 200
 wait 600
 snap d07_tripped
 press select
+wait 7000
 frames 2
 open 28
 frames 2

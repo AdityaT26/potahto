@@ -527,11 +527,11 @@ static void pairLoop() {
   uiGlyph(GLYPH_BT, 2, 16, 24);
   u8g2.setFont(F_SMALL);
   u8g2.drawStr(30, 22, "On your PC / phone:");
-  u8g2.drawStr(30, 31, "Bluetooth > Add device");
+  u8g2.drawStr(30, 31, "add a BT device,");
   char l[40]; snprintf(l, sizeof(l), "pick \"%s\"", S.devName); u8g2.drawStr(30, 40, l);
   u8g2.setFont(F_TINY);
   uiCenter(52, hidBleAdvertising() ? "discoverable now" : "starting...");
-  uiCenter(62, "already paired elsewhere? forget it there");
+  uiCenter(62, "paired before? forget it there");
 }
 
 static uint16_t s_loudF = 1500; static bool s_loudSweep = true; static uint32_t s_loudStep = 0;

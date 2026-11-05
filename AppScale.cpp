@@ -114,7 +114,7 @@ static void loopMain() {
   uiProgressBar(14, 48, 100, 6, ok ? mm / 2000.0f : 0);
 
   u8g2.setFont(F_TINY);
-  uiCenter(63, "LR unit  U tare  D list  SEL save");
+  uiCenter(63, "<> unit ^ tare v list SEL save");
 }
 
 void scaleLoop() {

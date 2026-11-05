@@ -4,7 +4,10 @@ snap 01_menu_tools
 press right
 snap 02_menu_control
 press right
-snap 03_menu_games
+snap 03_menu_wireless
+press right
+press right
+press right
 press right
 snap 04_menu_system
 press select

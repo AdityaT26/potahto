@@ -112,6 +112,6 @@ void pointerOverlayLoop() {
   const char* st = s_down ? "DRAGGING" : moving ? "moving" : (S.mouseHoldMoves ? "hold DOWN to move" : "moving (DOWN = freeze)");
   uiCenter(48, st);
   u8g2.setFont(F_TINY);
-  uiCenter(63, s_mode == PTR_FREE ? "SEL click/drag  R right  L done" : "SEL press-drag-release   L cancel");
+  uiCenter(63, s_mode == PTR_FREE ? "SEL click  > right  < done" : "SEL hold to drag  < cancel");
   if (!hidReady()) { u8g2.drawStr(0, 56, hidRouteName()); }
 }

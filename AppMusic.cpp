@@ -160,7 +160,7 @@ static void editLoop() {
   char pos[24]; snprintf(pos, sizeof(pos), "#%d of %d  %u bpm", s_cur + 1, s_song.n, s_song.bpm);
   uiRight(127, 58, pos);
   u8g2.setFont(F_TINY);
-  uiCenter(63, "U/D pitch  SEL len  hold SEL menu");
+  uiCenter(63, "^v pitch  SEL len  hold: menu");
 }
 
 void musicLoop() { if (s_editing) editLoop(); else libLoop(); }

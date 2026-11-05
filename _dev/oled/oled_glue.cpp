@@ -42,7 +42,7 @@ const char* netApPass() { static char p[12]; snprintf(p, sizeof p, "pt%s", S.web
 void netScanStart() {}
 static NetAP fakeAps[] = {
   {"HomeNet",-48,6,3,{0x10,0x20,0x30,0x40,0x50,0x60}}, {"HomeNet-5G",-61,36,3,{0x10,0x20,0x30,0x40,0x50,0x61}},
-  {"Sharma_2.4",-67,1,3,{1,2,3,4,5,6}}, {"JioFiber-x7",-72,11,3,{2,2,3,4,5,6}}, {"Airtel_Zerotouch",-79,6,3,{3,2,3,4,5,6}},
+  {"Neighbour_2.4",-67,1,3,{1,2,3,4,5,6}}, {"JioFiber-x7",-72,11,3,{2,2,3,4,5,6}}, {"Airtel_Zerotouch",-79,6,3,{3,2,3,4,5,6}},
   {"Cafe Guest",-85,11,0,{4,2,3,4,5,6}}, {"DIRECT-HP-Print",-88,6,3,{5,2,3,4,5,6}} };
 const NetAP* netScanResults(int* n) { *n = 7; return fakeAps; }
 void netExternalScan(bool) {}
