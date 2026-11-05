@@ -1,0 +1,55 @@
+frames 3
+hid ble
+open 10
+press down
+press select
+snap b01_bt
+hold select 700
+press down
+press select
+snap b02_sound
+press down
+press down
+press down
+press down
+press down
+press down
+snap b03_sound_tones
+press select
+frames 2
+snap b04_songpick
+hold select 700
+hold select 700
+press down
+press select
+snap b05_display
+hold select 700
+press down
+press select
+snap b06_power
+press down
+press down
+press down
+press down
+press down
+snap b07_power2
+hold select 700
+press down
+press select
+snap b08_time
+hold select 700
+press down
+press down
+press down
+press down
+press select
+snap b09_control
+hold select 700
+press down
+press select
+snap b10_desk
+press down
+press down
+press down
+press down
+snap b11_desk2

@@ -1,0 +1,34 @@
+frames 3
+net online
+open 22
+frames 5
+snap p6_01_wifiscan
+press right
+snap p6_02_channels
+press left
+press select
+snap p6_03_ap_detail
+press select
+wait 1500
+snap p6_04_hunter
+hold select 700
+open 23
+frames 5
+snap p6_05_ble
+press select
+wait 1200
+snap p6_06_finder
+hold select 700
+open 24
+frames 3
+snap p6_07_lan
+hold select 700
+open 25
+frames 3
+snap p6_08_doctor
+hold select 700
+open 26
+frames 3
+snap p6_09_wake
+press select
+snap p6_10_wake_sent

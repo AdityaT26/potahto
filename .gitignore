@@ -1,0 +1,14 @@
+# build output from the PC-side test tools
+_dev/oled/fw/
+_dev/oled/shots/
+_dev/oled/oled_sim
+_dev/oled/*.png
+_dev/sim/potahto_sim
+_dev/sim/*.o
+_dev/sim/shots/
+_dev/sim/server.log
+_dev/sim/server.pid
+__pycache__/
+*.pyc
+build/
+.vscode/

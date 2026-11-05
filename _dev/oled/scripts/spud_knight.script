@@ -1,0 +1,66 @@
+frames 3
+open 9
+frames 3
+snap k_01_hub
+press select
+frames 3
+snap k_02_camp
+press select
+frames 5
+snap k_03_intro
+wait 1500
+snap k_04_start
+hold right 1200
+snap k_05_moved
+press select
+frames 2
+snap k_06_swing
+hold right 900
+frames 4
+snap k_07_next
+hold select 800
+snap k_08_pause
+press down
+press down
+press select
+frames 3
+snap k_09_map
+press left
+frames 3
+hold down 1500
+snap k_10_down
+hold select 800
+press down
+press select
+frames 3
+snap k_11_fallen
+press select
+frames 3
+press down
+press select
+frames 3
+snap k_12_upgrades
+frames 3
+open 9
+frames 3
+press select
+frames 3
+press select
+wait 1500
+hold down 1600
+frames 3
+snap k2_01_room2
+press select
+frames 3
+press left
+press select
+frames 2
+snap k2_02_swing
+wait 1500
+snap k2_03_later
+hold select 800
+press down
+press down
+press select
+frames 2
+snap k2_04_map

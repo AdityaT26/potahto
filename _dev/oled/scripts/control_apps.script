@@ -1,0 +1,40 @@
+frames 5
+press right
+snap p4_01_control_folder
+press select
+snap p4_02_control_list
+press down
+press select
+frames 3
+snap p4_03_macro_profiles
+press down
+press select
+frames 3
+snap p4_04_pad_windows
+holdsnap up 400 p4_05_hold_layer
+press right
+snap p4_06_fired_right
+hold select 700
+hold select 700
+frames 3
+press down
+press select
+frames 30
+snap p4_07_presenter
+press right
+press right
+wait 65000
+snap p4_08_presenter_running
+hold select 700
+frames 3
+press down
+press select
+hid notready
+frames 3
+snap p4_09_shutter_unpaired
+hid ready
+press right
+frames 10
+snap p4_10_shutter_timer
+wait 4000
+snap p4_11_shutter_after

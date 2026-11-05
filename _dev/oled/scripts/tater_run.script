@@ -1,0 +1,20 @@
+frames 3
+open 9
+frames 3
+snap t_01_hub
+press select
+frames 3
+snap t_02_select
+press select
+frames 10
+snap t_03_start
+hold right 900
+snap t_04_run
+holdsnap right 400 t_05_runmore
+press up
+frames 4
+snap t_06_jump
+hold right 1500
+snap t_07_later
+hold select 900
+snap t_08_pause

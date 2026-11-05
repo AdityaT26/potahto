@@ -1,0 +1,63 @@
+frames 5
+press right
+press right
+press right
+snap p5_01_smart_folder
+press right
+snap p5_02_desk_folder
+press select
+snap p5_03_desk_list
+open 15
+snap p5_04_smart_button
+press up
+snap p5_05_smart_fired
+hold select 700
+open 16
+snap p5_06_smart_status
+hold select 700
+open 17
+frames 3
+snap p5_07_clock
+press right
+snap p5_08_timer
+press select
+wait 2000
+snap p5_09_timer_running
+press right
+snap p5_10_alarms
+hold right 700
+snap p5_11_alarm_edit_hour
+press select
+press select
+snap p5_12_alarm_set
+hold select 700
+open 18
+press select
+wait 3000
+snap p5_13_pomodoro
+hold select 700
+proto {"cmd":"pc.stats","host":"desktop","cpu":37.5,"ram":61,"gpu":12,"cpuT":-1,"gpuT":54,"up":10,"down":250}
+proto {"cmd":"pc.stats","host":"desktop","cpu":55,"ram":62,"gpu":30,"cpuT":-1,"gpuT":58,"up":12,"down":900}
+proto {"cmd":"pc.stats","host":"desktop","cpu":21,"ram":62,"gpu":8,"cpuT":-1,"gpuT":50,"up":3,"down":40}
+open 19
+snap p5_14_pcmon
+press right
+snap p5_15_pcmon_graph
+hold select 700
+open 20
+snap p5_16_guard
+hold select 700
+proto {"cmd":"notify","title":"Door","text":"Front door opened while you were away from your desk"}
+frames 5
+snap p5_17_banner
+proto {"cmd":"notify","title":"CI","text":"Build finished"}
+open 21
+snap p5_18_inbox
+press select
+snap p5_19_inbox_open
+proto {"cmd":"ring"}
+frames 5
+snap p5_20_ring
+press down
+frames 3
+snap p5_21_after_ring

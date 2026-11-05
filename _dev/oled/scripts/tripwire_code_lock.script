@@ -1,0 +1,26 @@
+frames 3
+time 1791100000
+set lockMode 2
+set lockCode UUDL
+tof 1200
+open 8
+frames 3
+press select
+wait 2000
+hold select 1700
+frames 3
+tof 100
+wait 600
+snap f01_tripped_locked
+press select
+frames 3
+snap f02_key_doesnt_silence
+press up
+press up
+press down
+press left
+frames 3
+snap f03_unlocked
+press down
+frames 3
+snap f04_silenced

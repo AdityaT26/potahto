@@ -1,0 +1,1312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Potahto</title>
+<style>
+:root{
+  --bg:#f6f3ee;--panel:#fffdf9;--panel2:#f1ece4;--ink:#22201c;--mute:#6f685e;--line:#e3dcd0;
+  --acc:#b8772a;--acc-ink:#fff;--acc-soft:#f3e4cf;--ok:#2f8f5b;--warn:#b5741c;--bad:#c0473b;
+  --r:14px;--shadow:0 1px 2px rgba(40,30,10,.06),0 4px 16px rgba(40,30,10,.05);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#151412;--panel:#1e1c19;--panel2:#262420;--ink:#ece7df;--mute:#a39b8e;--line:#34312b;
+  --acc:#e0a050;--acc-ink:#1a1408;--acc-soft:#3a2d1b;--ok:#5cc28a;--warn:#e0a050;--bad:#e2685c;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--acc)}
+header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{max-width:1040px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:.2px}
+.brand small{font-weight:500;color:var(--mute);font-size:12px}
+.pills{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:var(--panel2);color:var(--mute);font-size:13px;white-space:nowrap}
+.pill b{color:var(--ink);font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mute)}
+.dot.ok{background:var(--ok)}.dot.bad{background:var(--bad)}.dot.warn{background:var(--warn)}
+nav{max-width:1040px;margin:0 auto;padding:0 12px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav button{all:unset;cursor:pointer;padding:10px 12px;color:var(--mute);border-bottom:2px solid transparent;white-space:nowrap;font-weight:500}
+nav button[aria-selected=true]{color:var(--ink);border-color:var(--acc)}
+main{max-width:1040px;margin:0 auto;padding:18px 16px 60px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+.card h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--mute);font-weight:600;display:flex;align-items:center;gap:8px}
+.big{font-size:34px;font-weight:700;line-height:1.1}
+.mute{color:var(--mute)}.small{font-size:13px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px}
+.kv dt{color:var(--mute)}.kv dd{margin:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+button.btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font:inherit;font-weight:600;border-radius:10px;padding:8px 14px;cursor:pointer}
+button.btn:hover{border-color:var(--acc)}
+button.btn.pri{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+button.btn.danger{color:var(--bad)}
+button.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=text],input[type=password],input[type=number],select{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 10px;min-width:0}
+input:focus,select:focus{outline:2px solid var(--acc);outline-offset:1px}
+.field{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 12px;padding:9px 0;border-top:1px solid var(--line)}
+.field:first-of-type{border-top:0}
+.field label{font-weight:500}
+.field .ctl{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.field .full{grid-column:1/-1}
+input[type=range]{accent-color:var(--acc);width:120px}
+.val{min-width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--mute);font-size:13px}
+.sw{position:relative;width:42px;height:24px;flex:none}
+.sw input{opacity:0;width:0;height:0}
+.sw span{position:absolute;inset:0;border-radius:99px;background:var(--line);transition:.15s;cursor:pointer}
+.sw span:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.sw input:checked+span{background:var(--acc)}
+.sw input:checked+span:before{transform:translateX(18px)}
+.seg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:2px}
+.seg button{all:unset;cursor:pointer;white-space:nowrap;padding:4px 10px;border-radius:7px;font-size:13px;color:var(--mute)}
+.seg button[aria-pressed=true]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow);font-weight:600}
+.tag{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--acc-soft);color:var(--acc);font-weight:600;margin-left:6px}
+.hero{max-width:640px;margin:30px auto;text-align:center}
+.hero h1{font-size:28px;margin:12px 0 4px}
+.hero .grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));text-align:left;margin-top:22px}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:10px;padding:9px 4px;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bars{display:inline-flex;gap:2px;align-items:flex-end;height:14px}
+.bars i{width:4px;background:var(--line);border-radius:1px}
+.bars i.on{background:var(--acc)}
+.prog{height:10px;border-radius:99px;background:var(--panel2);overflow:hidden;border:1px solid var(--line)}
+.prog>div{height:100%;width:0;background:var(--acc);transition:width .2s}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);opacity:0;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;transition:.2s;pointer-events:none;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hidden{display:none!important}
+.sectionhead{display:flex;align-items:center;gap:12px;margin:0 0 14px}
+.sectionhead h2{margin:0;font-size:20px}
+.sectionhead .row{margin-left:auto}
+.mono{font-family:var(--mono)}
+.note{background:var(--acc-soft);border-radius:10px;padding:10px 12px;font-size:14px}
+.empty{color:var(--mute);padding:10px 0}
+.pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pad .k{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:5px;min-width:0}
+.pad .k.err{border-color:var(--bad)}
+.pad .k .kh{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mute);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.pad .k .kh button{margin-left:auto}
+.pad .k input{width:100%;padding:5px 8px;font-size:13px}
+.pad .k input.m{font-family:var(--mono)}
+.pad .k .e{font-size:12px;color:var(--bad);min-height:0}
+.pad .gap{visibility:hidden}
+button.mini{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-size:12px;font-weight:600;border-radius:7px;padding:2px 8px;cursor:pointer}
+button.mini:hover{border-color:var(--acc)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{all:unset;cursor:pointer;padding:6px 12px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font-weight:600;font-size:14px}
+.chip[aria-pressed=true]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+code{font-family:var(--mono);font-size:13px;background:var(--panel2);padding:1px 5px;border-radius:5px}
+.help td{padding:3px 10px 3px 0;vertical-align:top;font-size:13px}
+textarea{font:13px/1.4 var(--mono);color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 10px;width:100%;min-height:54px;resize:vertical}
+.hook{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px;display:grid;gap:6px}
+.hook .row input[type=text]{flex:1}
+.days{display:inline-flex;gap:3px}
+.days button{all:unset;cursor:pointer;width:26px;text-align:center;padding:4px 0;border-radius:6px;font-size:12px;font-weight:600;background:var(--panel2);color:var(--mute);border:1px solid var(--line)}
+.days button[aria-pressed=true]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+input[type=time]{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:5px 8px}
+pre.code{font:12px/1.5 var(--mono);background:var(--panel2);border-radius:10px;padding:10px;overflow:auto;margin:6px 0}
+.grid.music{grid-template-columns:minmax(300px,1fr) minmax(0,2.2fr)}
+@media (max-width:760px){.grid.music{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){.pad{grid-template-columns:1fr}.pad .gap{display:none}}
+@media (max-width:520px){.field{grid-template-columns:1fr}.field .ctl{justify-content:flex-start}input[type=range]{width:100%}.big{font-size:28px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 19c-2-6 2-13 9-14 7-1 12 4 11 10s-6 12-12 12c-4 0-7-3-8-8z" fill="var(--acc)"/><circle cx="13" cy="13" r="1.3" fill="var(--acc-ink)" opacity=".6"/><circle cx="20" cy="17" r="1.1" fill="var(--acc-ink)" opacity=".6"/><circle cx="14" cy="21" r="1" fill="var(--acc-ink)" opacity=".6"/></svg>
+      <span id="devname">Potahto</span><small id="fwver"></small>
+    </div>
+    <div class="pills" id="pills"></div>
+  </div>
+  <nav id="tabs" role="tablist" class="hidden"></nav>
+</header>
+
+<main>
+  <section id="connect" class="hero">
+    <svg width="64" height="64" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 19c-2-6 2-13 9-14 7-1 12 4 11 10s-6 12-12 12c-4 0-7-3-8-8z" fill="var(--acc)"/></svg>
+    <h1>Connect to Potahto</h1>
+    <p class="mute">Configure everything on your multitool from here.</p>
+    <div class="grid">
+      <div class="card" id="usbCard">
+        <h3>USB cable</h3>
+        <p class="small mute">Plug Potahto into this computer. Works in Chrome or Edge, no PIN needed.</p>
+        <button class="btn pri" id="btnUsb">Connect over USB</button>
+        <p class="small mute hidden" id="usbNo">This browser has no Web Serial. Use Chrome or Edge on a desktop, or connect over WiFi.</p>
+      </div>
+      <div class="card" id="bleCard">
+        <h3>Bluetooth</h3>
+        <p class="small mute">No cable, no WiFi. Chrome or Edge. Pair Potahto in your computer's Bluetooth settings first for the smoothest ride.</p>
+        <div class="row" style="margin-bottom:8px"><input type="text" id="bleName" placeholder="Potahto" style="flex:1"></div>
+        <button class="btn pri" id="btnBle">Connect over Bluetooth</button>
+        <p class="small mute hidden" id="bleNo">This browser has no Web Bluetooth. Use Chrome or Edge, or USB / WiFi.</p>
+      </div>
+      <div class="card">
+        <h3>WiFi</h3>
+        <p class="small mute">Find the address and PIN under <b>System &rsaquo; Connect</b> on the device.</p>
+        <div class="row" style="margin-bottom:8px" id="hostRow">
+          <input type="text" id="host" placeholder="potahto.local" style="flex:1">
+        </div>
+        <div class="row">
+          <input type="password" id="pin" inputmode="numeric" maxlength="6" placeholder="6-digit PIN" style="flex:1" autocomplete="off">
+          <button class="btn pri" id="btnWifi">Connect</button>
+        </div>
+      </div>
+    </div>
+    <p class="small mute" id="connErr" style="color:var(--bad)"></p>
+  </section>
+
+  <div id="pages"></div>
+</main>
+<div id="toast"></div>
+
+<script>
+"use strict";
+// ============================================================================
+//  Potahto web app. Talks the JSON protocol from Proto.h over Web Serial (USB)
+//  or HTTP (POST /api?pin=...). Pages are registered in PAGES; the Settings
+//  page is generated entirely from the device's schema.
+// ============================================================================
+const $ = (s, el = document) => el.querySelector(s);
+const h = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") e.className = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (k === "html") e.innerHTML = v;
+    else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(k));
+  return e;
+};
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function toast(msg, ms = 2200) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), ms);
+}
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("potahto." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("potahto." + k, JSON.stringify(v)); } catch {} },
+};
+
+// ---- transports
+class SerialLink {
+  constructor() { this.kind = "usb"; this.pending = new Map(); this.id = 1; this.buf = ""; }
+  async open() {
+    this.port = await navigator.serial.requestPort();
+    await this.port.open({ baudRate: 115200, bufferSize: 65536 });
+    try { await this.port.setSignals({ dataTerminalReady: true, requestToSend: false }); } catch {}
+    this.writer = this.port.writable.getWriter();
+    this.reading = this.readLoop();
+    this.port.addEventListener("disconnect", () => this.onclose && this.onclose());
+  }
+  async readLoop() {
+    const dec = new TextDecoder();
+    while (this.port.readable) {
+      this.reader = this.port.readable.getReader();
+      try {
+        for (;;) {
+          const { value, done } = await this.reader.read();
+          if (done) break;
+          this.buf += dec.decode(value, { stream: true });
+          let i;
+          while ((i = this.buf.indexOf("\n")) >= 0) {
+            const line = this.buf.slice(0, i).trim(); this.buf = this.buf.slice(i + 1);
+            if (!line.startsWith("{")) continue;          // ignore boot logs etc.
+            let msg; try { msg = JSON.parse(line); } catch { continue; }
+            const p = this.pending.get(msg.id);
+            if (p) { this.pending.delete(msg.id); p(msg); }
+          }
+        }
+      } catch (e) { break; } finally { try { this.reader.releaseLock(); } catch {} }
+    }
+    this.onclose && this.onclose();
+  }
+  async call(cmd, args = {}, timeout = 6000) {
+    const id = this.id++;
+    const body = JSON.stringify({ id, cmd, ...args }) + "\n";
+    const p = new Promise((res, rej) => {
+      this.pending.set(id, res);
+      setTimeout(() => { if (this.pending.delete(id)) rej(new Error("timeout")); }, timeout);
+    });
+    await this.writer.write(new TextEncoder().encode(body));
+    return p;
+  }
+  async close() { try { await this.reader?.cancel(); } catch {} try { this.writer.releaseLock(); } catch {} try { await this.port.close(); } catch {} }
+}
+// Bluetooth LE: the same JSON lines over a Nordic-UART-style GATT service
+const NUS = "6e400001-b5a3-f393-e0a9-e50e24dcca9e", NUS_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e", NUS_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+class BleLink {
+  constructor() { this.kind = "ble"; this.pending = new Map(); this.id = 1; this.buf = ""; this.q = Promise.resolve(); }
+  async open(namePrefix) {
+    const opts = namePrefix ? { filters: [{ namePrefix }], optionalServices: [NUS] } : { acceptAllDevices: true, optionalServices: [NUS] };
+    this.dev = await navigator.bluetooth.requestDevice(opts);
+    this.dev.addEventListener("gattserverdisconnected", () => this.onclose && this.onclose());
+    const srv = await this.dev.gatt.connect();
+    const svc = await srv.getPrimaryService(NUS);
+    this.rx = await svc.getCharacteristic(NUS_RX);
+    this.tx = await svc.getCharacteristic(NUS_TX);
+    const dec = new TextDecoder();
+    this.tx.addEventListener("characteristicvaluechanged", e => {
+      this.buf += dec.decode(e.target.value, { stream: true });
+      let i;
+      while ((i = this.buf.indexOf("\n")) >= 0) {
+        const line = this.buf.slice(0, i).trim(); this.buf = this.buf.slice(i + 1);
+        if (!line.startsWith("{")) continue;
+        let msg; try { msg = JSON.parse(line); } catch { continue; }
+        const p = this.pending.get(msg.id);
+        if (p) { this.pending.delete(msg.id); p(msg); }
+      }
+    });
+    await this.tx.startNotifications();
+  }
+  async call(cmd, args = {}, timeout = 8000) {
+    const id = this.id++;
+    const bytes = new TextEncoder().encode(JSON.stringify({ id, cmd, ...args }) + "\n");
+    const p = new Promise((res, rej) => {
+      this.pending.set(id, res);
+      setTimeout(() => { if (this.pending.delete(id)) rej(new Error("timeout")); }, timeout);
+    });
+    // one write at a time, in 180-byte pieces (fits any negotiated MTU)
+    this.q = this.q.then(async () => { for (let o = 0; o < bytes.length; o += 180) await this.rx.writeValueWithResponse(bytes.slice(o, o + 180)); }).catch(() => {});
+    await this.q;
+    return p;
+  }
+  async close() { try { this.dev.gatt.disconnect(); } catch {} }
+}
+class HttpLink {
+  constructor(base, pin) { this.kind = "wifi"; this.base = base; this.pin = pin; this.id = 1; }
+  async call(cmd, args = {}, timeout = 8000) {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), timeout);
+    try {
+      // text/plain + PIN in the query string = a "simple" request (no CORS preflight)
+      const r = await fetch(`${this.base}/api?pin=${encodeURIComponent(this.pin)}`,
+        { method: "POST", body: JSON.stringify({ id: this.id++, cmd, ...args }), signal: ctl.signal });
+      return await r.json();
+    } finally { clearTimeout(t); }
+  }
+  async close() {}
+}
+
+// ---- app state
+const app = { link: null, info: null, status: null, schema: null, page: null, timer: null };
+async function call(cmd, args, timeout) {
+  if (!app.link) throw new Error("not connected");
+  const r = await app.link.call(cmd, args, timeout);
+  if (r && r.ok === false && r.err === "auth") { toast("PIN rejected"); disconnect(); }
+  return r;
+}
+
+const servedByDevice = location.protocol.startsWith("http") && !/^(localhost|127\.)/.test(location.hostname);
+function initConnect() {
+  if (!("serial" in navigator)) { $("#btnUsb").disabled = true; $("#usbNo").classList.remove("hidden"); }
+  if (!("bluetooth" in navigator)) { $("#btnBle").disabled = true; $("#bleNo").classList.remove("hidden"); }
+  $("#bleName").value = store.get("bleName", "Potahto");
+  $("#btnBle").onclick = () => connect("ble");
+  if (servedByDevice) { $("#hostRow").classList.add("hidden"); $("#usbCard").classList.add("hidden"); $("#bleCard").classList.add("hidden"); }
+  $("#host").value = store.get("host", "potahto.local");
+  $("#pin").value = store.get("pin:" + (servedByDevice ? location.host : $("#host").value), "");
+  $("#btnUsb").onclick = () => connect("usb");
+  $("#btnWifi").onclick = () => connect("wifi");
+  $("#pin").addEventListener("keydown", e => { if (e.key === "Enter") connect("wifi"); });
+  if (servedByDevice && $("#pin").value) connect("wifi");
+}
+
+async function connect(kind) {
+  $("#connErr").textContent = "";
+  try {
+    let link;
+    if (kind === "usb") { link = new SerialLink(); await link.open(); }
+    else if (kind === "ble") {
+      link = new BleLink(); const nm = $("#bleName").value.trim();
+      await link.open(nm); store.set("bleName", nm);
+      const hi = await link.call("hello", {}, 5000);
+      if (hi.needPin) {
+        const pin = $("#pin").value.trim() || prompt("Not paired: enter the 6-digit web PIN shown on Potahto (Settings > Device)");
+        const a = await link.call("auth", { pin: pin || "" });
+        if (!a.ok) throw new Error(a.err === "locked" ? `Too many wrong PINs. Try again in ${a.retryIn}s.` : "Wrong PIN.");
+      }
+    }
+    else {
+      const pin = $("#pin").value.trim();
+      if (!/^\d{6}$/.test(pin)) throw new Error("Enter the 6-digit PIN shown on the device.");
+      const host = servedByDevice ? location.host : $("#host").value.trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
+      link = new HttpLink(servedByDevice ? "" : "http://" + host, pin);
+      const a = await link.call("auth", { pin });
+      if (!a.ok) throw new Error(a.err === "locked" ? `Too many wrong PINs. Try again in ${a.retryIn}s.` : "Wrong PIN.");
+      store.set("host", host); store.set("pin:" + host, pin);
+    }
+    app.link = link;
+    link.onclose = () => { if (app.link === link) { toast("Disconnected"); disconnect(); } };
+    let hello;
+    for (let i = 0; i < 3 && !hello; i++) { try { hello = await call("hello", {}, 3000); } catch { await sleep(400); } }
+    if (!hello || hello.device !== "potahto") throw new Error("No Potahto answered on that port.");
+    app.info = hello;
+    $("#devname").textContent = hello.name; $("#fwver").textContent = "v" + hello.fw;
+    document.title = hello.name;
+    $("#connect").classList.add("hidden"); $("#tabs").classList.remove("hidden");
+    call("time.set", { epoch: Date.now() / 1000 }).catch(() => {});   // keep Potahto's clock right
+    buildTabs(); showPage(store.get("page", "dash"));
+    pollStatus();
+  } catch (e) {
+    $("#connErr").textContent = e.name === "NotFoundError" ? "" : (e.message || String(e));
+    if (app.link) { try { await app.link.close(); } catch {} app.link = null; }
+  }
+}
+async function disconnect() {
+  clearTimeout(app.timer);
+  const l = app.link; app.link = null; app.schema = null;
+  if (l) try { await l.close(); } catch {}
+  $("#connect").classList.remove("hidden"); $("#tabs").classList.add("hidden");
+  $("#pages").replaceChildren(); $("#pills").replaceChildren();
+}
+
+// ---- header pills
+async function pollStatus() {
+  clearTimeout(app.timer);
+  if (!app.link) return;
+  try {
+    const s = await call("status", {}, 4000);
+    if (s.ok) { app.status = s; renderPills(); PAGES[app.page]?.onStatus?.(s); }
+  } catch {}
+  app.timer = setTimeout(pollStatus, 2500);
+}
+function renderPills() {
+  const s = app.status, w = s.wifi, b = s.battery;
+  const bc = b.pct > 40 ? "ok" : b.pct > 15 ? "warn" : "bad";
+  $("#pills").replaceChildren(
+    h("span", { class: "pill" }, h("span", { class: "dot ok" }), ({ usb: "USB", ble: "Bluetooth", wifi: "WiFi" })[app.link.kind]),
+    h("span", { class: "pill" }, h("span", { class: "dot " + (w.state === "Online" ? "ok" : w.ap ? "warn" : "") }), w.state === "Online" ? w.ssid : w.ap ? "Setup hotspot" : "WiFi " + w.state.toLowerCase()),
+    h("span", { class: "pill" }, h("span", { class: "dot " + bc }), h("b", {}, b.pct + "%"), b.charging ? " charging" : ""),
+  );
+}
+
+// ---- pages
+const PAGES = {};
+const PAGE_ORDER = [];
+function page(id, title, render, extra = {}) { PAGES[id] = { id, title, render, ...extra }; PAGE_ORDER.push(id); }
+function buildTabs() {
+  $("#tabs").replaceChildren(...PAGE_ORDER.map(id =>
+    h("button", { role: "tab", "data-id": id, onclick: () => showPage(id) }, PAGES[id].title)));
+}
+async function showPage(id) {
+  if (!PAGES[id]) id = PAGE_ORDER[0];
+  if (app.page && app.page !== id) { try { PAGES[app.page]?.onLeave?.(); } catch {} }
+  app.page = id; store.set("page", id);
+  for (const b of $("#tabs").children) b.setAttribute("aria-selected", b.dataset.id === id);
+  const root = h("section");
+  $("#pages").replaceChildren(root);
+  try { await PAGES[id].render(root); } catch (e) { root.append(h("p", { class: "empty" }, "Error: " + e.message)); }
+}
+function head(root, title, ...right) { root.append(h("div", { class: "sectionhead" }, h("h2", {}, title), h("div", { class: "row" }, ...right))); }
+function rssiBars(r) { const n = r > -55 ? 4 : r > -65 ? 3 : r > -75 ? 2 : 1; return h("span", { class: "bars", title: r + " dBm" }, [6, 9, 12, 14].map((ht, i) => h("i", { class: i < n ? "on" : "", style: `height:${ht}px` }))); }
+const fmtUp = s => { const d = Math.floor(s / 86400), hh = Math.floor(s / 3600) % 24, m = Math.floor(s / 60) % 60; return (d ? d + "d " : "") + (hh ? hh + "h " : "") + m + "m"; };
+
+// ---- Dashboard
+page("dash", "Dashboard", async root => {
+  head(root, "Dashboard");
+  const g = h("div", { class: "grid" }); root.append(g);
+  const bat = h("div", { class: "card" }), net = h("div", { class: "card" }), dev = h("div", { class: "card" });
+  const act = h("div", { class: "card" },
+    h("h3", {}, "Quick actions"),
+    h("div", { class: "row", style: "margin-bottom:10px" },
+      h("input", { type: "text", id: "msg", placeholder: "Show a message on the screen", maxlength: 22, style: "flex:1" }),
+      h("button", { class: "btn", onclick: async () => { const t = $("#msg").value.trim(); if (t) { await call("toast", { text: t }); toast("Sent"); } } }, "Send")),
+    h("div", { class: "row" },
+      h("button", { class: "btn", onclick: async () => { toast("Hold the device still..."); const r = await call("cal.gyro", {}, 5000); toast(r.ok ? "Gyro zeroed" : r.err); } }, "Calibrate gyro"),
+      h("button", { class: "btn", onclick: async () => { const r = await call("cal.level"); toast(r.ok ? "Level set" : r.err); } }, "Set level here"),
+      h("button", { class: "btn danger", onclick: async () => { if (confirm("Restart Potahto?")) { await call("reboot"); toast("Restarting..."); } } }, "Restart")),
+    h("div", { class: "row", style: "margin-top:10px" },
+      h("button", { class: "btn", onclick: async () => { const r = await call("power", { do: "off" }); toast(r.ok ? "Screen off" : r.err); } }, "Screen off"),
+      h("button", { class: "btn", onclick: async () => { const r = await call("power", { do: "lock" }); toast(r.ok ? "Locked" : r.err); } }, "Lock"),
+      h("button", { class: "btn", onclick: async () => { const r = await call("power", { do: "wake" }); toast(r.ok ? "Screen on" : r.err); } }, "Wake"),
+      h("button", { class: "btn", onclick: async () => { if (confirm("Deep sleep? Press UP, DOWN or LEFT on Potahto to wake it.")) { await call("power", { do: "sleep" }); toast("Sleeping"); } } }, "Deep sleep")));
+  const link = h("div", { class: "card" });
+  g.append(bat, net, link, dev, act);
+  const draw = s => {
+    const b = s.battery, w = s.wifi;
+    bat.replaceChildren(h("h3", {}, "Battery"), h("div", { class: "big" }, b.pct + "%"),
+      h("div", { class: "prog", style: "margin:10px 0" }, h("div", { style: `width:${b.pct}%` })),
+      h("div", { class: "mute small" }, `${b.v} V` + (b.charging ? " · charging" : "")));
+    net.replaceChildren(h("h3", {}, "WiFi"), h("dl", { class: "kv" },
+      h("dt", {}, "Status"), h("dd", {}, w.ap ? "Setup hotspot" : w.state),
+      h("dt", {}, "Network"), h("dd", {}, w.ssid || "-"),
+      h("dt", {}, "Address"), h("dd", { class: "mono" }, w.ip ? `${w.ip}  (${w.host}.local)` : "-"),
+      h("dt", {}, "Signal"), h("dd", {}, w.rssi ? rssiBars(w.rssi) : "-")));
+    link.replaceChildren(h("h3", {}, "Keys & Bluetooth"), h("dl", { class: "kv" },
+      h("dt", {}, "Keys & mouse"), h("dd", {}, s.route || "-"),
+      h("dt", {}, "Bluetooth host"), h("dd", {}, s.bleHost || "none"),
+      h("dt", {}, "Screen"), h("dd", {}, s.screen === false ? "off" : "on"),
+      h("dt", {}, "Watching"), h("dd", {}, [s.trip && "Tripwire", s.guard && "Desk Guard"].filter(Boolean).join(", ") || "-")));
+    const sens = Object.entries(s.sensors).filter(([, v]) => v).map(([k]) => ({ mpu: "Motion", compass: "Compass", tof: "Distance" })[k]).join(", ") || "none";
+    dev.replaceChildren(h("h3", {}, "Device"), h("dl", { class: "kv" },
+      h("dt", {}, "Firmware"), h("dd", {}, "v" + app.info.fw),
+      h("dt", {}, "Open app"), h("dd", {}, s.app),
+      h("dt", {}, "Uptime"), h("dd", {}, fmtUp(s.uptime)),
+      h("dt", {}, "Time"), h("dd", {}, s.time ? s.time + (s.timeSrc ? ` (${s.timeSrc})` : "") : "not set"),
+      h("dt", {}, "Sensors"), h("dd", {}, sens),
+      h("dt", {}, "Free memory"), h("dd", {}, Math.round(s.heap / 1024) + " KB" + (s.psram ? ` + ${Math.round(s.psram / 1048576)} MB PSRAM` : ""))));
+  };
+  if (app.status) draw(app.status); else bat.append(h("p", { class: "empty" }, "Loading..."));
+  PAGES.dash.onStatus = draw;
+});
+
+// ---- Settings (generated from the schema)
+const SF = { HIDDEN: 1, SECRET: 2, REBOOT: 4, ADV: 8, CUSTOM: 16, ZOFF: 32, SONG: 64, MACRO: 128 };
+let SONGS = null;     // [{slot,name}] user + built-in, for "tone" pickers
+async function songChoices() {
+  if (!SONGS) { const r = await call("song.list"); SONGS = [{ slot: 0, name: "Default" }, ...r.songs, ...r.builtin.map(b => ({ ...b, name: b.name + " (built-in)" }))]; }
+  return SONGS;
+}
+const pendingSet = {}; let setTimer = null;
+function queueSet(k, v) {
+  pendingSet[k] = v;
+  clearTimeout(setTimer);
+  setTimer = setTimeout(async () => {
+    const values = { ...pendingSet }; for (const k of Object.keys(pendingSet)) delete pendingSet[k];
+    const r = await call("set", { values });
+    if (r.errors && Object.keys(r.errors).length) toast("Rejected: " + Object.keys(r.errors).join(", "));
+    else toast(r.reboot ? "Saved. Restart to apply." : "Saved", 1200);
+  }, 350);
+}
+function macroInput(f, onSave) {
+  const box = h("div", { style: "display:grid;gap:4px;width:100%" });
+  const i = h("input", { type: "text", class: "mono", value: f.v ?? "", maxlength: f.max, spellcheck: "false", placeholder: "{win+l}", style: "width:100%" });
+  const e = h("div", { class: "small", style: "color:var(--bad);min-height:0" });
+  let t;
+  i.oninput = () => { clearTimeout(t); t = setTimeout(async () => {
+    const c = i.value ? await call("macro.check", { macro: i.value }) : { ok: true };
+    e.textContent = c.ok ? "" : c.err;
+    if (c.ok) { f.v = i.value; (onSave || (v => queueSet(f.k, v)))(i.value); }
+  }, 450); };
+  box.append(i, e);
+  return box;
+}
+function control(f) {
+  const opts = f.o ? f.o.split("|") : null;
+  if (f.f & SF.MACRO) return macroInput(f);
+  if (f.f & SF.SONG) {
+    const sel = h("select", { onchange: () => { f.v = +sel.value; queueSet(f.k, f.v); } }, h("option", { value: f.v }, "…"));
+    songChoices().then(list => { sel.replaceChildren(...list.map(x => h("option", { value: x.slot }, x.name))); sel.value = f.v; });
+    return sel;
+  }
+  if (f.t === "bool" && !opts) {
+    const i = h("input", { type: "checkbox" }); i.checked = !!f.v;
+    i.onchange = () => { f.v = i.checked; queueSet(f.k, i.checked); };
+    return h("label", { class: "sw" }, i, h("span"));
+  }
+  if (opts && opts.length <= 4 && opts.join("").length <= 24) {
+    const seg = h("div", { class: "seg" });
+    const cur = f.t === "bool" ? (f.v ? 1 : 0) : f.v;
+    opts.forEach((o, i) => seg.append(h("button", { "aria-pressed": String(i === cur), onclick: () => {
+      for (const b of seg.children) b.setAttribute("aria-pressed", "false");
+      seg.children[i].setAttribute("aria-pressed", "true");
+      f.v = f.t === "bool" ? !!i : i; queueSet(f.k, f.v);
+    } }, o)));
+    return seg;
+  }
+  if (opts) {
+    const s = h("select", { onchange: () => { f.v = +s.value; queueSet(f.k, f.v); } }, opts.map((o, i) => h("option", { value: i }, o)));
+    s.value = f.t === "bool" ? (f.v ? 1 : 0) : f.v; return s;
+  }
+  if (f.t === "str") {
+    const secret = f.f & SF.SECRET;
+    const i = h("input", { type: secret ? "password" : "text", maxlength: f.max, placeholder: secret ? (f.set ? "unchanged" : "not set") : "", autocomplete: "off", style: "width:190px" });
+    if (!secret) i.value = f.v ?? ""; else if (f.v) i.value = f.v;
+    i.onchange = () => { if (secret && !i.value) return; queueSet(f.k, i.value); };
+    return i;
+  }
+  const dec = f.st && f.st < 1 ? Math.min(3, String(f.st).split(".")[1]?.length || 2) : 0;
+  const r = h("input", { type: "range", min: f.lo, max: f.hi, step: f.st || 1 });
+  r.value = f.v;
+  const unit = (f.l.match(/\(([^)]*)\)\s*$/) || [])[1] || "";
+  const fmt = v => (f.f & SF.ZOFF) && +v === 0 ? "Off" : (+v).toFixed(dec) + (unit && unit.length <= 3 ? " " + unit : "");
+  const out = h("span", { class: "val", style: "min-width:46px" }, fmt(f.v));
+  r.oninput = () => { out.textContent = fmt(r.value); };
+  r.onchange = () => { f.v = +r.value; queueSet(f.k, f.v); };
+  return h("span", { class: "ctl" }, r, out);
+}
+page("settings", "Settings", async root => {
+  const showAdv = store.get("adv", false);
+  const advSw = h("input", { type: "checkbox" }); advSw.checked = showAdv;
+  advSw.onchange = () => { store.set("adv", advSw.checked); showPage("settings"); };
+  head(root, "Settings", h("span", { class: "mute small" }, "Advanced"), h("label", { class: "sw" }, advSw, h("span")));
+  const r = await call("schema");
+  app.schema = r.fields;
+  const groups = {};
+  for (const f of r.fields) {
+    if (f.g === "WiFi" || (f.f & 16)) continue;          // WiFi + custom fields have their own pages
+    if ((f.f & SF.ADV) && !showAdv) continue;
+    (groups[f.g] ||= []).push(f);
+  }
+  const g = h("div", { class: "grid" }); root.append(g);
+  for (const [name, fields] of Object.entries(groups)) {
+    const c = h("div", { class: "card" }, h("h3", {}, name));
+    for (const f of fields) {
+      const ctl = control(f);
+      c.append(h("div", { class: "field" },
+        h("label", { class: (f.f & SF.MACRO) ? "full" : "" }, f.l, f.f & SF.REBOOT ? h("span", { class: "tag" }, "restart") : null),
+        (f.f & SF.MACRO) ? h("div", { class: "full" }, ctl) : ctl));
+    }
+    g.append(c);
+  }
+  root.append(h("p", { class: "small mute" }, "Changes apply instantly and are stored on the device (the device's own Settings menu has the same options). They survive firmware updates."));
+});
+
+// ---- WiFi
+page("wifi", "WiFi", async root => {
+  head(root, "WiFi");
+  const sc = await call("schema");
+  const F = Object.fromEntries(sc.fields.map(f => [f.k, f]));
+  const g = h("div", { class: "grid" }); root.append(g);
+  const modeCard = h("div", { class: "card" }, h("h3", {}, "Radio"),
+    h("div", { class: "field" }, h("label", {}, "WiFi"), control(F.wifiMode)),
+    h("p", { class: "small mute" }, "Always on: online from power-up (smart home, web app any time, NTP clock). On demand (default): online for 2 minutes after power-up (clock sync, smart-home check-in) and whenever a tool needs it, otherwise off to save battery. You can also join networks on the device: Settings › WiFi."));
+  const slots = h("div", { class: "card", style: "grid-column:1/-1" }, h("h3", {}, "Saved networks"),
+    h("p", { class: "small mute", style: "margin-top:-4px" }, "Up to 5. The strongest one in range wins. Campus / office WiFi that asks for a username and password (no web page): choose Enterprise. Newest goes first."));
+  const rows = [];
+  const NS = 5;
+  for (let i = 0; i < NS; i++) {
+    const ss = h("input", { type: "text", maxlength: 32, placeholder: "Network name", value: F["wSsid" + i]?.v || "", style: "flex:2;min-width:120px" });
+    const sec = h("select", {}, ["Password", "Enterprise PEAP", "Enterprise TTLS"].map((o, k) => h("option", { value: k }, o)));
+    sec.value = F["wEap" + i]?.v || 0;
+    const us = h("input", { type: "text", maxlength: 64, placeholder: "Username / ID", value: F["wUser" + i]?.v || "", style: "flex:1;min-width:110px", autocomplete: "off" });
+    const pw = h("input", { type: "password", maxlength: 64, placeholder: F["wPass" + i]?.set ? "unchanged" : "password", style: "flex:1;min-width:110px", autocomplete: "off" });
+    const sync = () => us.classList.toggle("hidden", sec.value === "0");
+    sec.onchange = sync; sync();
+    rows.push({ ss, sec, us, pw });
+    slots.append(h("div", { class: "row", style: "margin-bottom:8px" }, h("span", { class: "mute small", style: "width:14px" }, i + 1), ss, sec, us, pw));
+  }
+  slots.append(h("div", { class: "row" },
+    h("button", { class: "btn pri", onclick: async () => {
+      const values = {};
+      rows.forEach(({ ss, sec, us, pw }, i) => {
+        const name = ss.value.trim();
+        values["wSsid" + i] = name;
+        values["wEap" + i] = name && sec.value !== "0" ? +sec.value : 0;
+        values["wUser" + i] = name && sec.value !== "0" ? us.value.trim() : "";
+        if (pw.value) values["wPass" + i] = pw.value;
+        if (!name) values["wPass" + i] = "";
+      });
+      const r = await call("set", { values }); await call("save");
+      toast(r.ok ? "Saved. Potahto is reconnecting..." : "Could not save");
+    } }, "Save networks")));
+  const inputs = rows.map(r => [r.ss, r.pw, r.sec, r.us]);
+  const scan = h("div", { class: "card" }, h("h3", {}, "Nearby networks"));
+  const list = h("div", { class: "list" }, h("p", { class: "empty" }, "Press Scan."));
+  const doScan = async () => {
+    list.replaceChildren(h("p", { class: "empty" }, "Scanning..."));
+    await call("wifi.scan");
+    for (let t = 0; t < 20; t++) {
+      await sleep(700);
+      const r = await call("wifi.list");
+      if (r.state >= 0) {
+        r.aps.sort((x, y) => y.rssi - x.rssi);
+        list.replaceChildren(...(r.aps.length ? r.aps.map(a => h("div", { class: "li" }, rssiBars(a.rssi),
+          h("span", { class: "grow" }, a.ssid), h("span", { class: "mute small" }, (a.open ? "open · " : a.ent ? "username · " : "") + "ch " + a.ch),
+          h("button", { class: "btn", onclick: () => {
+            const slot = inputs.find(([ss]) => !ss.value.trim() || ss.value.trim() === a.ssid) || inputs[0];
+            slot[0].value = a.ssid;
+            if (a.ent) { slot[2].value = "1"; slot[2].onchange(); slot[3].focus(); toast("Campus WiFi: type your username + password, then Save"); }
+            else { slot[2].value = "0"; slot[2].onchange(); slot[1].focus(); toast("Now type the password and press Save"); }
+          } }, "Use"))) : [h("p", { class: "empty" }, "No networks found.")]));
+        return;
+      }
+    }
+    list.replaceChildren(h("p", { class: "empty" }, "Scan timed out. If WiFi is Off, switch it on first."));
+  };
+  scan.append(h("div", { class: "row", style: "margin-bottom:6px" }, h("button", { class: "btn", onclick: doScan }, "Scan")), list);
+  const ap = h("div", { class: "card" }, h("h3", {}, "Setup hotspot"),
+    h("p", { class: "small mute" }, "Potahto can open its own hotspot. Join it from a phone or laptop and this page opens automatically, which helps when it has no saved network yet."),
+    h("div", { class: "row" },
+      h("button", { class: "btn", onclick: async () => { const r = await call("wifi.setup", { on: true }); toast("Hotspot " + r.ssid + " is on"); } }, "Start hotspot"),
+      h("button", { class: "btn", onclick: async () => { await call("wifi.setup", { on: false }); toast("Hotspot off"); } }, "Stop")));
+  g.append(modeCard, slots, scan, ap);
+});
+
+// ---- Games
+page("games", "Games", async root => {
+  head(root, "Games", h("button", { class: "btn danger", onclick: async () => {
+    if (!confirm("Reset all high scores?")) return; await call("hiscores", { reset: true }); showPage("games"); } }, "Reset scores"));
+  const r = await call("hiscores");
+  const c = h("div", { class: "card" }, h("h3", {}, "Best scores"));
+  c.append(h("div", { class: "list" }, r.games.map(gm => h("div", { class: "li" }, h("span", { class: "grow" }, gm.name), h("b", {}, gm.best)))));
+  root.append(c);
+});
+
+// ---- Backup
+page("backup", "Backup", async root => {
+  head(root, "Backup & restore");
+  const sec = h("input", { type: "checkbox" });
+  const g = h("div", { class: "grid" }); root.append(g);
+  g.append(
+    h("div", { class: "card" }, h("h3", {}, "Download backup"),
+      h("p", { class: "small mute" }, "Settings, calibration and high scores as a JSON file."),
+      app.link.kind === "usb" ? h("div", { class: "row", style: "margin-bottom:10px" }, h("label", { class: "sw" }, sec, h("span")), h("span", { class: "small" }, "Include WiFi passwords and PIN")) : null,
+      h("button", { class: "btn pri", onclick: async () => {
+        const r = await call("backup", { secrets: sec.checked }); delete r.id; delete r.ok;
+        const a = h("a", { href: URL.createObjectURL(new Blob([JSON.stringify(r, null, 2)], { type: "application/json" })),
+          download: `${app.info.name.toLowerCase()}-backup-${new Date().toISOString().slice(0, 10)}.json` });
+        a.click(); URL.revokeObjectURL(a.href);
+      } }, "Download")),
+    h("div", { class: "card" }, h("h3", {}, "Restore"),
+      h("p", { class: "small mute" }, "Load a backup file. Values that this firmware does not know are skipped."),
+      h("input", { type: "file", accept: ".json,application/json", onchange: async e => {
+        const f = e.target.files[0]; if (!f) return;
+        let data; try { data = JSON.parse(await f.text()); } catch { return toast("Not a valid backup file"); }
+        if (!data.potahtoBackup) return toast("Not a Potahto backup");
+        const r = await call("restore", { settings: data.settings, hiscores: data.hiscores }, 10000);
+        toast(r.ok ? `Restored ${r.restored} settings` : r.err);
+      } })));
+});
+
+// ---- Firmware
+page("fw", "Firmware", async root => {
+  head(root, "Firmware");
+  const g = h("div", { class: "grid" }); root.append(g);
+  const prog = h("div", { class: "prog" }, h("div")), msg = h("p", { class: "small mute" });
+  const wifiCard = h("div", { class: "card" }, h("h3", {}, "Update over WiFi"),
+    h("p", { class: "small mute" }, "In the Arduino IDE use Sketch › Export Compiled Binary, then pick the ", h("span", { class: "mono" }, "potahto.ino.bin"), " file (not the merged or bootloader one). Settings are kept."));
+  if (app.link.kind === "wifi") {
+    const file = h("input", { type: "file", accept: ".bin" });
+    wifiCard.append(file, h("div", { style: "margin:12px 0 6px" }, prog), msg,
+      h("button", { class: "btn pri", onclick: () => {
+        const f = file.files[0]; if (!f) return toast("Choose a .bin file first");
+        const fd = new FormData(); fd.append("firmware", f, f.name);
+        const x = new XMLHttpRequest();
+        x.open("POST", `${app.link.base}/update?pin=${encodeURIComponent(app.link.pin)}`);
+        x.upload.onprogress = e => { if (e.lengthComputable) { prog.firstChild.style.width = (100 * e.loaded / e.total) + "%"; msg.textContent = Math.round(e.loaded / 1024) + " KB sent"; } };
+        x.onload = () => { let r = {}; try { r = JSON.parse(x.responseText); } catch {}
+          if (r.ok) { msg.textContent = "Done. Potahto is restarting; reconnect in a few seconds."; setTimeout(disconnect, 2500); }
+          else msg.textContent = "Update failed: " + (r.err || x.status); };
+        x.onerror = () => { msg.textContent = "Upload interrupted."; };
+        x.send(fd); msg.textContent = "Uploading...";
+      } }, "Upload & install"));
+  } else wifiCard.append(h("p", { class: "note" }, "Connect over WiFi to upload firmware from here."));
+  g.append(wifiCard, h("div", { class: "card" }, h("h3", {}, "Other ways"),
+    h("p", { class: "small" }, h("b", {}, "USB: "), "upload from the Arduino IDE as usual."),
+    h("p", { class: "small" }, h("b", {}, "Arduino IDE over WiFi: "), `pick the network port "${app.info.host}" under Tools › Port. The password is the web PIN.`),
+    h("p", { class: "small mute" }, "Every method keeps your settings, calibration and scores.")));
+});
+
+// ---- Macros
+const DIRN = ["Up", "Down", "Left", "Right", "Select"];
+const KEYNAMES = ["Up", "Down", "Left", "Right", "Select", "Hold up", "Hold down", "Hold left", "Hold right"];
+const keyName = (i, layout) => i < 5 ? DIRN[i] : i < 9 ? (layout === "folders" ? "Folder " : "Hold ") + DIRN[i - 5].toLowerCase() : `${DIRN[(i - 9) % 5]}`;
+const K = (l, m) => [l, m];
+const fold = (name) => K(name, "");
+// Curated profiles (Windows shortcuts). "app" = program names the companion reports.
+const MACRO_LIB = [
+  { name: "Windows", layout: "hold", app: "explorer.exe", keys: [K("Task view","{win+tab}"),K("Desktop","{win+d}"),K("Alt-Tab","{alt+tab}"),K("Snip","{win+shift+s}{pointer drag}"),K("Clipboard","{win+v}"),K("Lock","{win+l}"),K("Explorer","{win+e}"),K("Settings","{win+i}"),K("Flush DNS","{admin ipconfig /flushdns}")] },
+  { name: "Media", layout: "hold", app: "", keys: [K("Vol +","{media volup}"),K("Vol -","{media voldown}"),K("Prev","{media prev}"),K("Next","{media next}"),K("Play","{media playpause}"),K("Mute","{media mute}"),K("Stop","{media stop}"),K("-5 s","{left}"),K("+5 s","{right}")] },
+  { name: "VS Code", layout: "folders", app: "Code.exe", keys: [K("Commands","{ctrl+shift+p}"),K("Terminal","{ctrl+`}"),K("Back","{alt+left}"),K("Forward","{alt+right}"),K("Files","{ctrl+p}"),
+    fold("Edit"),fold("Run"),fold("View"),fold("Go to"),
+    K("Comment","{ctrl+/}"),K("Format","{shift+alt+f}"),K("Rename","{f2}"),K("Multi-cur","{ctrl+alt+down}"),K("Fold","{ctrl+shift+[}"),
+    K("Run","{f5}"),K("Stop","{shift+f5}"),K("Step into","{f11}"),K("Step over","{f10}"),K("Breakpoint","{f9}"),
+    K("Explorer","{ctrl+shift+e}"),K("Search","{ctrl+shift+f}"),K("Git","{ctrl+shift+g}"),K("Split","{ctrl+\\}"),K("Zen","{ctrl+k}z"),
+    K("Line","{ctrl+g}"),K("Symbol","{ctrl+shift+o}"),K("References","{shift+f12}"),K("Definition","{f12}"),K("Problems","{ctrl+shift+m}")] },
+  { name: "Chrome", layout: "folders", app: "chrome.exe;msedge.exe", keys: [K("New tab","{ctrl+t}"),K("Close tab","{ctrl+w}"),K("Prev tab","{ctrl+shift+tab}"),K("Next tab","{ctrl+tab}"),K("Reopen","{ctrl+shift+t}"),
+    fold("Page"),fold("Navigate"),fold("Window"),fold("Video"),
+    K("Top","{home}"),K("Bottom","{end}"),K("Zoom -","{ctrl+minus}"),K("Zoom +","{ctrl+equal}"),K("Reload","{f5}"),
+    K("Address","{ctrl+l}"),K("Downloads","{ctrl+j}"),K("Back","{alt+left}"),K("Forward","{alt+right}"),K("Find","{ctrl+f}"),
+    K("New window","{ctrl+n}"),K("Incognito","{ctrl+shift+n}"),K("History","{ctrl+h}"),K("Bookmark","{ctrl+d}"),K("Full scrn","{f11}"),
+    K("Play/pause","k"),K("Mute","m"),K("Back 10 s","j"),K("Fwd 10 s","l"),K("Fullscreen","f")] },
+  { name: "PowerPoint", layout: "hold", app: "POWERPNT.EXE", keys: [K("Start","{f5}"),K("From here","{shift+f5}"),K("Prev","{left}"),K("Next","{right}"),K("Black","b"),K("Laser","{ctrl+l}"),K("Pen","{ctrl+p}"),K("Erase ink","e"),K("End show","{esc}")] },
+  { name: "Word", layout: "folders", app: "WINWORD.EXE", keys: [K("Bold","{ctrl+b}"),K("Italic","{ctrl+i}"),K("Undo","{ctrl+z}"),K("Redo","{ctrl+y}"),K("Save","{ctrl+s}"),
+    fold("Format"),fold("Insert"),fold("Navigate"),fold("Review"),
+    K("Heading 1","{ctrl+alt+1}"),K("Heading 2","{ctrl+alt+2}"),K("Bullets","{ctrl+shift+l}"),K("Normal","{ctrl+shift+n}"),K("Underline","{ctrl+u}"),
+    K("Link","{ctrl+k}"),K("Comment","{ctrl+alt+m}"),K("Page break","{ctrl+enter}"),K("Footnote","{ctrl+alt+f}"),K("Date","{alt+shift+d}"),
+    K("Find","{ctrl+f}"),K("Replace","{ctrl+h}"),K("Go to","{ctrl+g}"),K("Top","{ctrl+home}"),K("End","{ctrl+end}"),
+    K("Track chg","{ctrl+shift+e}"),K("Spelling","{f7}"),K("Word count","{ctrl+shift+g}"),K("Read aloud","{ctrl+alt+space}"),K("Dictate","{alt+`}")] },
+  { name: "Excel", layout: "folders", app: "EXCEL.EXE", keys: [K("AutoSum","{alt+equal}"),K("Fill down","{ctrl+d}"),K("Filter","{ctrl+shift+l}"),K("New sheet","{shift+f11}"),K("Save","{ctrl+s}"),
+    fold("Format"),fold("Edit"),fold("Navigate"),fold("Data"),
+    K("Number","{ctrl+shift+1}"),K("Percent","{ctrl+shift+5}"),K("Currency","{ctrl+shift+4}"),K("Date","{ctrl+shift+3}"),K("Bold","{ctrl+b}"),
+    K("Edit cell","{f2}"),K("Insert row","{ctrl+shift+equal}"),K("Delete row","{ctrl+minus}"),K("Undo","{ctrl+z}"),K("Redo","{ctrl+y}"),
+    K("Top","{ctrl+up}"),K("Bottom","{ctrl+down}"),K("Prev sheet","{ctrl+pgup}"),K("Next sheet","{ctrl+pgdn}"),K("Go to","{f5}"),
+    K("Table","{ctrl+t}"),K("Refresh","{ctrl+alt+f5}"),K("Chart","{alt+f1}"),K("Flash fill","{ctrl+e}"),K("Abs ref","{f4}")] },
+  { name: "Photoshop", layout: "folders", app: "Photoshop.exe", keys: [K("Undo","{ctrl+z}"),K("Brush","b"),K("Zoom -","{ctrl+minus}"),K("Zoom +","{ctrl+equal}"),K("Fit","{ctrl+0}"),
+    fold("Tools"),fold("Layers"),fold("Brush"),fold("Adjust"),
+    K("Move","v"),K("Marquee","m"),K("Lasso","l"),K("Crop","c"),K("Eyedrop","i"),
+    K("New layer","{ctrl+shift+n}"),K("Duplicate","{ctrl+j}"),K("Merge","{ctrl+e}"),K("Group","{ctrl+g}"),K("Fill","{shift+f5}"),
+    K("Size -","["),K("Size +","]"),K("Softer","{shift+[}"),K("Harder","{shift+]}"),K("Swap col","x"),
+    K("Levels","{ctrl+l}"),K("Curves","{ctrl+m}"),K("Hue/Sat","{ctrl+u}"),K("Invert","{ctrl+i}"),K("Transform","{ctrl+t}")] },
+  { name: "Figma", layout: "folders", app: "Figma.exe", keys: [K("Frame","f"),K("Rectangle","r"),K("Text","t"),K("Pen","p"),K("Undo","{ctrl+z}"),
+    fold("View"),fold("Arrange"),fold("Align"),fold("Edit"),
+    K("Zoom fit","{shift+1}"),K("Zoom sel","{shift+2}"),K("100%","{shift+0}"),K("Rulers","{shift+r}"),K("Outline","{ctrl+y}"),
+    K("Group","{ctrl+g}"),K("Ungroup","{ctrl+shift+g}"),K("Auto layout","{shift+a}"),K("Frame sel","{ctrl+alt+g}"),K("Component","{ctrl+alt+k}"),
+    K("Left","{alt+a}"),K("Right","{alt+d}"),K("Top","{alt+w}"),K("Bottom","{alt+s}"),K("Center H","{alt+h}"),
+    K("Duplicate","{ctrl+d}"),K("Copy props","{ctrl+alt+c}"),K("Paste prop","{ctrl+alt+v}"),K("Hide","{ctrl+shift+h}"),K("Lock","{ctrl+shift+l}")] },
+  { name: "Teams", layout: "hold", app: "ms-teams.exe;Teams.exe", keys: [K("Mute","{ctrl+shift+m}"),K("Camera","{ctrl+shift+o}"),K("Hand","{ctrl+shift+k}"),K("Share","{ctrl+shift+e}"),K("Accept","{ctrl+shift+s}"),K("Chat","{ctrl+2}"),K("Leave","{ctrl+shift+h}"),K("Blur","{ctrl+shift+p}"),K("Decline","{ctrl+shift+d}")] },
+  { name: "Zoom", layout: "hold", app: "Zoom.exe", keys: [K("Mute","{alt+a}"),K("Video","{alt+v}"),K("Hand","{alt+y}"),K("Share","{alt+s}"),K("Chat","{alt+h}"),K("Record","{alt+r}"),K("Leave","{alt+q}"),K("Gallery","{alt+f2}"),K("Speaker","{alt+f1}")] },
+  { name: "Google Meet", layout: "hold", app: "", keys: [K("Mic","{ctrl+d}"),K("Camera","{ctrl+e}"),K("Hand","{ctrl+alt+h}"),K("Chat","{ctrl+alt+c}"),K("Captions","c"),K("People","{ctrl+alt+p}"),K("",""),K("",""),K("","")] },
+  { name: "Discord", layout: "hold", app: "Discord.exe", keys: [K("Mute","{ctrl+shift+m}"),K("Deafen","{ctrl+shift+d}"),K("Prev chan","{alt+up}"),K("Next chan","{alt+down}"),K("Switcher","{ctrl+k}"),K("Call","{ctrl+'}"),K("Mark read","{esc}"),K("Upload","{ctrl+shift+u}"),K("Emoji","{ctrl+e}")] },
+  { name: "Slack", layout: "hold", app: "slack.exe", keys: [K("Switcher","{ctrl+k}"),K("Unreads","{ctrl+shift+a}"),K("Prev","{alt+up}"),K("Next","{alt+down}"),K("Threads","{ctrl+shift+t}"),K("Huddle","{ctrl+shift+h}"),K("Mute","{ctrl+shift+space}"),K("Mark read","{esc}"),K("Search","{ctrl+g}")] },
+  { name: "Spotify", layout: "hold", app: "Spotify.exe", keys: [K("Vol +","{ctrl+up}"),K("Vol -","{ctrl+down}"),K("Prev","{ctrl+left}"),K("Next","{ctrl+right}"),K("Play","{space}"),K("Like","{alt+shift+b}"),K("Shuffle","{ctrl+s}"),K("Repeat","{ctrl+r}"),K("Search","{ctrl+l}")] },
+  { name: "OBS (F13+)", layout: "hold", app: "obs64.exe", keys: [K("Record","{f13}"),K("Stop rec","{f14}"),K("Scene 1","{f15}"),K("Scene 2","{f16}"),K("Mic mute","{f17}"),K("Stream","{f18}"),K("Pause rec","{f19}"),K("Scene 3","{f20}"),K("Replay","{f21}")] },
+  { name: "PC admin", layout: "hold", app: "", keys: [K("Task Mgr","{ctrl+shift+esc}"),K("Admin cmd","{admin echo Ready}"),K("Flush DNS","{admin ipconfig /flushdns}"),K("IP config","{cmd ipconfig}"),K("Run","{win+r}"),K("Lock","{win+l}"),K("Sleep","{run rundll32.exe powrprof.dll,SetSuspendState 0,1,0}"),K("Restart PC","{admin shutdown /r /t 5}"),K("Explorer","{win+e}")] },
+];
+page("macros", "Macros", async root => {
+  const r = await call("macro.get");
+  const sc = await call("schema");
+  const FF = Object.fromEntries(sc.fields.map(f => [f.k, f]));
+  let data = structuredClone(r.data), cur = Math.min(store.get("macroProf", 0), data.profiles.length - 1), dirty = false;
+  const lim = r.limits;
+  for (const p of data.profiles) { p.layout ||= "hold"; p.app ||= ""; while (p.keys.length < 29) p.keys.push(["", ""]); }
+  const status = h("div", { class: "card" });
+  const drawStatus = async () => {
+    const hs = await call("hid.status");
+    status.replaceChildren(h("h3", {}, "Output"), h("dl", { class: "kv" },
+      h("dt", {}, "Sending to"), h("dd", {}, hs.route),
+      h("dt", {}, "USB"), h("dd", {}, hs.usb ? "connected to a computer" : "not connected"),
+      h("dt", {}, "Bluetooth"), h("dd", {}, !hs.ble ? "off (Settings › Bluetooth)" : hs.bleConnected ? "paired and connected" : "waiting: pair “" + app.info.name + "”"),
+      h("dt", {}, "PC app now"), h("dd", {}, r.pcApp || "none (needs the companion)")),
+      h("div", { class: "field" }, h("label", {}, "Follow the PC app", h("div", { class: "small mute" }, "switch profile when you switch programs")), control(FF.macroAuto)),
+      h("div", { class: "row", style: "margin-top:10px" },
+        h("button", { class: "btn danger", onclick: async () => { if (confirm("Forget all paired Bluetooth hosts?")) { await call("hid.unpair"); toast("Pairings cleared"); drawStatus(); } } }, "Forget pairings")));
+  };
+  const saveBtn = h("button", { class: "btn pri", onclick: save }, "Save");
+  const markDirty = () => { dirty = true; saveBtn.textContent = "Save changes"; };
+  const libCard = h("div", { class: "card hidden", style: "margin-top:14px" });
+  const addProfile = p => {
+    if (data.profiles.length >= lim.profiles) return toast(`Up to ${lim.profiles} profiles`);
+    const c = structuredClone(p); while (c.keys.length < 29) c.keys.push(["", ""]);
+    data.profiles.push(c); cur = data.profiles.length - 1; markDirty(); draw();
+  };
+  head(root, "Macro Pad",
+    h("button", { class: "btn", onclick: () => { libCard.classList.toggle("hidden"); } }, "Library"),
+    h("button", { class: "btn", onclick: () => addProfile({ name: "Profile " + (data.profiles.length + 1), layout: "hold", app: "", keys: [] }) }, "Add blank"),
+    h("button", { class: "btn", onclick: async () => { if (!confirm("Replace all profiles with the built-in defaults?")) return; await call("macro.reset"); showPage("macros"); } }, "Defaults"),
+    saveBtn);
+  const drawLib = () => {
+    const have = new Set(data.profiles.map(p => p.name.toLowerCase()));
+    libCard.replaceChildren(h("h3", {}, "Profile library"), h("p", { class: "small mute" }, "Ready-made profiles for popular apps. Adding one copies it; edit it however you like, then Save. ✓ = already on Potahto."),
+      h("div", { class: "chips" }, MACRO_LIB.map(p => h("button", { class: "chip lib", title: have.has(p.name.toLowerCase()) ? "Already added: adds a fresh copy" : "", onclick: () => { addProfile(p); toast(p.name + " added"); } }, (have.has(p.name.toLowerCase()) ? "✓ " : "+ ") + p.name))));
+  };
+  root.append(libCard);
+  if (!r.stored) root.append(h("p", { class: "note" }, "This partition scheme has no file storage, so changes can't be saved. Use the default “3MB APP/1.5MB SPIFFS” scheme."));
+  const body = h("div"); root.append(body);
+  const grid = h("div", { class: "grid", style: "margin-top:14px" }); root.append(grid);
+  grid.append(status, h("div", { class: "card help" }, h("h3", {}, "Macro syntax"),
+    h("table", {}, ...[
+      ["Hello", "types the text (US layout)"], ["{enter} {tab} {esc} {f5}", "single keys"],
+      ["{ctrl+shift+t} {win+r}", "key combos (ctrl shift alt win)"], ["{delay 300}", "wait 300 ms"],
+      ["{media playpause}", "next prev volup voldown mute stop"], ["{mouse left} {scroll -3}", "mouse"],
+      ["{pointer drag}", "then tilt-to-point: e.g. {win+shift+s}{pointer drag} = snip"],
+      ["{run notepad}", "Win+R, type, Enter (apps, files, URLs)"],
+      ["{cmd ipconfig}", "opens a command prompt and runs it"],
+      ["{admin netsh wlan show profiles}", "same, as administrator (accepts UAC with Alt+Y)"],
+      ["{pc shutdown /h}", "the PC companion runs it silently (needs --allow-run)"],
+      ["{f13} … {f24}", "spare keys apps can bind"], ["{{", "a literal {"]].map(([a, b]) => h("tr", {}, h("td", {}, h("code", {}, a)), h("td", { class: "mute" }, b))))));
+  drawStatus();
+
+  const checkTimers = {};
+  function keyCell(p, i, label) {
+    const k = p.keys[i] || (p.keys[i] = ["", ""]);
+    const e = h("div", { class: "e" });
+    const box = h("div", { class: "k" });
+    const lab = h("input", { type: "text", placeholder: "label", maxlength: lim.label, value: k[0] });
+    const mac = h("input", { type: "text", class: "m", placeholder: "{ctrl+c}", value: k[1], spellcheck: "false" });
+    lab.oninput = () => { k[0] = lab.value; markDirty(); };
+    mac.oninput = () => {
+      k[1] = mac.value; markDirty();
+      clearTimeout(checkTimers[i]);
+      checkTimers[i] = setTimeout(async () => { const c = await call("macro.check", { macro: mac.value }); e.textContent = c.ok ? "" : c.err; box.classList.toggle("err", !c.ok); }, 400);
+    };
+    const test = h("button", { class: "mini", title: "Types it after 3 s", onclick: async () => {
+      const t = await call("macro.run", { macro: mac.value, delay: 3000 });
+      if (!t.ok) return toast(t.err);
+      for (let n = 3; n > 0; n--) { toast(`Click where it should go… ${n}`, 1100); await sleep(1000); }
+      toast("Sent via " + t.route);
+    } }, "Test");
+    box.append(h("div", { class: "kh" }, label || keyName(i, p.layout), test), lab, mac, e);
+    return box;
+  }
+  const gap = () => h("div", { class: "gap" });
+  const cross = (p, base, center) => h("div", { class: "pad" }, gap(), keyCell(p, base + 0), gap(), keyCell(p, base + 2), center, keyCell(p, base + 3), gap(), keyCell(p, base + 1), gap());
+  function draw() {
+    store.set("macroProf", cur);
+    drawLib();
+    const p = data.profiles[cur];
+    const chips = h("div", { class: "chips" }, data.profiles.map((pp, i) =>
+      h("button", { class: "chip", "aria-pressed": String(i === cur), onclick: () => { cur = i; draw(); } }, pp.name || "(unnamed)")));
+    const name = h("input", { type: "text", value: p.name, maxlength: lim.name, style: "width:160px" });
+    name.oninput = () => { p.name = name.value; markDirty(); chips.children[cur].textContent = name.value || "(unnamed)"; };
+    const appIn = h("input", { type: "text", value: p.app, maxlength: lim.app, placeholder: "e.g. Code.exe;code.exe", style: "flex:1;min-width:160px", spellcheck: "false" });
+    appIn.oninput = () => { p.app = appIn.value; markDirty(); };
+    const lay = h("div", { class: "seg" }, ["hold", "folders"].map(l => h("button", { "aria-pressed": String(p.layout === l), onclick: () => { p.layout = l; markDirty(); draw(); } }, l === "hold" ? "Hold = 2nd macro (9)" : "Hold = folder (25)")));
+    const tools = h("div", { class: "row" }, h("span", { class: "mute small" }, "Name"), name,
+      h("button", { class: "mini", onclick: () => { if (cur > 0) { [data.profiles[cur - 1], data.profiles[cur]] = [data.profiles[cur], data.profiles[cur - 1]]; cur--; markDirty(); draw(); } } }, "←"),
+      h("button", { class: "mini", onclick: () => { if (cur < data.profiles.length - 1) { [data.profiles[cur + 1], data.profiles[cur]] = [data.profiles[cur], data.profiles[cur + 1]]; cur++; markDirty(); draw(); } } }, "→"),
+      h("button", { class: "mini", onclick: () => { if (data.profiles.length < 2) return toast("Keep at least one profile"); if (!confirm(`Delete “${p.name}”?`)) return; data.profiles.splice(cur, 1); cur = Math.max(0, cur - 1); markDirty(); draw(); } }, "Delete"));
+    const tap = cross(p, 0, keyCell(p, 4));
+    const cards = [h("div", { class: "card" }, h("h3", {}, "Tap"), tap)];
+    if (p.layout === "folders") {
+      for (let f = 0; f < 4; f++) {
+        const k = p.keys[5 + f];
+        const fn = h("input", { type: "text", value: k[0], maxlength: lim.label, placeholder: "folder name", style: "width:130px" });
+        fn.oninput = () => { k[0] = fn.value; k[1] = ""; markDirty(); };
+        cards.push(h("div", { class: "card" }, h("h3", {}, `Hold ${DIRN[f].toLowerCase()} → folder`, fn), cross(p, 9 + f * 5, keyCell(p, 9 + f * 5 + 4))));
+      }
+    } else {
+      cards.push(h("div", { class: "card" }, h("h3", {}, "Hold"), h("div", { class: "pad" }, gap(), keyCell(p, 5), gap(), keyCell(p, 7),
+        h("div", { class: "k", style: "justify-content:center;text-align:center" }, h("span", { class: "mute small" }, "Hold SELECT = back")), keyCell(p, 8), gap(), keyCell(p, 6), gap())));
+    }
+    body.replaceChildren(h("div", { class: "card" }, chips,
+        h("div", { style: "margin:12px 0" }, tools),
+        h("div", { class: "row", style: "margin-bottom:8px" }, h("span", { class: "mute small" }, "Layout"), lay),
+        h("div", { class: "row" }, h("span", { class: "mute small" }, "Use for PC app"), appIn)),
+      h("div", { class: "grid", style: "margin-top:14px;grid-template-columns:repeat(auto-fit,minmax(340px,1fr))" }, ...cards));
+  }
+  async function save() {
+    const out = { v: 2, profiles: data.profiles.map(p => ({ ...p, keys: p.keys.slice(0, p.layout === "folders" ? 29 : 9) })) };
+    const res = await call("macro.set", { data: out }, 10000);
+    if (res.ok) { dirty = false; saveBtn.textContent = "Save"; toast("Saved to Potahto"); return; }
+    if (res.errors && res.errors.length) {
+      const e0 = res.errors[0]; cur = e0.p; draw();
+      toast(`${data.profiles[e0.p].name}: ${e0.k >= 0 ? keyName(e0.k, data.profiles[e0.p].layout) + " – " : ""}${e0.err}`, 4000);
+    } else toast(res.err || "Save failed");
+  }
+  draw();
+});
+
+// ---- Smart home
+page("smart", "Smart", async root => {
+  const r = await call("iot.get");
+  const cfg = structuredClone(r.cfg), events = r.events;
+  let dirty = false;
+  const saveBtn = h("button", { class: "btn pri", onclick: save }, "Save");
+  const mark = () => { dirty = true; saveBtn.textContent = "Save changes"; };
+  head(root, "Smart home", saveBtn);
+  if (!r.stored) root.append(h("p", { class: "note" }, "No file storage on this partition scheme: settings here can't be saved."));
+  const statusLine = h("span", { class: "pill" }, "…");
+  const refresh = async () => { const st = await call("iot.status"); statusLine.replaceChildren(h("span", { class: "dot " + (st.mqtt === "Connected" ? "ok" : st.mqttOn ? "warn" : "") }), "MQTT: " + (st.mqttOn ? st.mqtt : "off")); };
+  refresh(); PAGES.smart.onStatus = refresh;
+
+  const inp = (obj, key, attrs = {}) => { const i = h("input", { type: "text", value: obj[key] ?? "", ...attrs }); i.oninput = () => { obj[key] = attrs.type === "number" ? +i.value : i.value; mark(); }; return i; };
+  const sw = (obj, key) => { const i = h("input", { type: "checkbox" }); i.checked = !!obj[key]; i.onchange = () => { obj[key] = i.checked; mark(); }; return h("label", { class: "sw" }, i, h("span")); };
+  const m = cfg.mqtt;
+  const pass = h("input", { type: "password", placeholder: m.passSet ? "unchanged" : "none", autocomplete: "off" });
+  pass.oninput = () => { m.pass = pass.value; mark(); };
+  const mq = h("div", { class: "card" }, h("h3", {}, "Home Assistant / MQTT", statusLine),
+    h("div", { class: "field" }, h("label", {}, "Enabled"), sw(m, "on")),
+    h("div", { class: "field" }, h("label", {}, "Broker"), h("span", { class: "ctl" }, inp(m, "host", { placeholder: "192.168.1.10", style: "width:150px" }), inp(m, "port", { type: "number", style: "width:80px" }))),
+    h("div", { class: "field" }, h("label", {}, "Username"), inp(m, "user", { style: "width:180px" })),
+    h("div", { class: "field" }, h("label", {}, "Password"), h("span", { class: "ctl" }, pass)),
+    h("div", { class: "field" }, h("label", {}, "HA auto-discovery"), sw(m, "ha")),
+    h("div", { class: "field" }, h("label", {}, "Base topic"), inp(m, "base", { style: "width:180px" })),
+    h("p", { class: "small mute" }, "Port 8883 uses TLS. While MQTT is on, WiFi stays on. Potahto shows up in Home Assistant as “", app.info.name, "” with sensors, a Ring button, a Message box and a device trigger for every button and event."));
+
+  // webhooks
+  const hooksCard = h("div", { class: "card" });
+  const hookOpts = sel => [h("option", { value: -1 }, "none"), ...cfg.hooks.map((hk, i) => h("option", { value: i, selected: i === sel }, hk.name || `Webhook ${i + 1}`))];
+  function drawHooks() {
+    hooksCard.replaceChildren(h("h3", {}, "Webhooks"),
+      ...cfg.hooks.map((hk, i) => {
+        const meth = h("select", { onchange: () => { hk.method = meth.value; mark(); } }, ["GET", "POST", "PUT"].map(x => h("option", { selected: hk.method === x }, x)));
+        const body = h("textarea", { placeholder: '{"event":"{event}"}' }); body.value = hk.body || ""; body.oninput = () => { hk.body = body.value; mark(); };
+        return h("div", { class: "hook" },
+          h("div", { class: "row" }, inp(hk, "name", { placeholder: "Name", maxlength: 19, style: "width:140px" }), meth,
+            h("button", { class: "mini", onclick: async () => { if (dirty) await save(); const t = await call("iot.test", { hook: i }); toast(t.ok ? "Sent. Result shows under Smart Status." : t.err); setTimeout(refreshHook, 2500); } }, "Test"),
+            h("button", { class: "mini", onclick: () => {
+              cfg.hooks.splice(i, 1);
+              const fix = v => v === i ? -1 : v > i ? v - 1 : v;
+              cfg.buttons.forEach(b => b.hook = fix(b.hook)); cfg.rules.forEach(rr => rr.hook = fix(rr.hook));
+              mark(); drawHooks(); drawKeys(); drawRules(); } }, "Delete")),
+          h("div", { class: "row" }, inp(hk, "url", { placeholder: "https://…", maxlength: 199, style: "flex:1" })),
+          hk.method === "GET" ? null : body);
+      }),
+      h("div", { class: "row" },
+        h("button", { class: "btn", onclick: () => { if (cfg.hooks.length >= r.limits.hooks) return toast(`Up to ${r.limits.hooks} webhooks`); cfg.hooks.push({ name: "Webhook " + (cfg.hooks.length + 1), method: "POST", url: "", body: '{"event":"{event}","device":"{name}"}', type: "application/json" }); mark(); drawHooks(); drawKeys(); drawRules(); } }, "Add webhook"),
+        h("span", { class: "small mute" }, "Placeholders: ", h("code", {}, "{event}"), " ", h("code", {}, "{name}"), " ", h("code", {}, "{battery}"), " ", h("code", {}, "{time}"))),
+      h("p", { class: "small mute", id: "hookres" }));
+  }
+  const refreshHook = async () => { const st = await call("iot.status"); const el = $("#hookres"); if (el && st.lastHook) el.textContent = `Last: ${st.lastHook} → ${st.lastCode > 0 ? "HTTP " + st.lastCode : st.lastCode === -3 ? "no WiFi" : "failed"}`; };
+
+  // Smart Button key bindings
+  const keysCard = h("div", { class: "card" });
+  function drawKeys() {
+    const cell = i => { const b = cfg.buttons[i]; const s2 = h("select", { onchange: () => { b.hook = +s2.value; mark(); } }, hookOpts(b.hook));
+      return h("div", { class: "k" }, h("div", { class: "kh" }, KEYNAMES[i]), inp(b, "label", { maxlength: 11, placeholder: "label" }), s2); };
+    const gap = () => h("div", { class: "gap" });
+    keysCard.replaceChildren(h("h3", {}, "Smart Button keys"),
+      h("p", { class: "small mute" }, "Every press is also a Home Assistant trigger. Pick a webhook to call as well."),
+      h("div", { class: "small mute", style: "margin:6px 0" }, "Tap"),
+      h("div", { class: "pad" }, gap(), cell(0), gap(), cell(2), cell(4), cell(3), gap(), cell(1), gap()),
+      h("div", { class: "small mute", style: "margin:14px 0 6px" }, "Hold"),
+      h("div", { class: "pad" }, gap(), cell(5), gap(), cell(7), h("div", { class: "gap" }), cell(8), gap(), cell(6), gap()));
+  }
+  // event rules
+  const rulesCard = h("div", { class: "card" });
+  function drawRules() {
+    rulesCard.replaceChildren(h("h3", {}, "Event → webhook"),
+      ...cfg.rules.map((ru, i) => {
+        const ev = h("select", { onchange: () => { ru.event = ev.value; mark(); } }, events.map(e => h("option", { selected: e === ru.event }, e)));
+        const hk = h("select", { onchange: () => { ru.hook = +hk.value; mark(); } }, hookOpts(ru.hook));
+        return h("div", { class: "row", style: "margin-bottom:6px" }, ev, h("span", { class: "mute" }, "→"), hk, h("button", { class: "mini", onclick: () => { cfg.rules.splice(i, 1); mark(); drawRules(); } }, "×"));
+      }),
+      h("button", { class: "btn", onclick: () => { if (cfg.rules.length >= r.limits.rules) return toast("Rule limit reached"); cfg.rules.push({ event: events[0], hook: cfg.hooks.length ? 0 : -1 }); mark(); drawRules(); } }, "Add rule"));
+  }
+  const ha = h("div", { class: "card" }, h("h3", {}, "Use it from Home Assistant"),
+    h("p", { class: "small" }, "Device id ", h("code", {}, r.devId), ". Send a message to the screen:"),
+    h("pre", { class: "code" }, `service: mqtt.publish\ndata:\n  topic: ${r.root}/cmd/notify\n  payload: '{"title":"Door","text":"Front door opened"}'`),
+    h("p", { class: "small mute" }, "Other commands: ", h("code", {}, "cmd/ring"), " (find me), ", h("code", {}, "cmd/message"), " (plain text), ", h("code", {}, "cmd/toast"), "."));
+  const g = h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fit,minmax(340px,1fr))" }, mq, hooksCard, keysCard, rulesCard, ha);
+  root.append(g);
+  drawHooks(); drawKeys(); drawRules(); refreshHook();
+  async function save() {
+    const res = await call("iot.set", { cfg }, 10000);
+    if (res.ok) { dirty = false; saveBtn.textContent = "Save"; delete cfg.mqtt.pass; toast("Saved"); setTimeout(refresh, 1500); }
+    else toast(res.err || "Save failed", 4000);
+  }
+});
+
+// ---- Desk
+const COMPANION = /*COMPANION*/"";
+page("desk", "Desk", async root => {
+  head(root, "Desk");
+  const sc = await call("schema");
+  const F = Object.fromEntries(sc.fields.map(f => [f.k, f]));
+  const setv = async values => { const r = await call("set", { values }); if (!r.ok) toast("Rejected"); };
+  const g = h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fit,minmax(320px,1fr))" }); root.append(g);
+  // alarms
+  const al = h("div", { class: "card" }, h("h3", {}, "Alarms"));
+  const DAY = ["M", "T", "W", "T", "F", "S", "S"];
+  for (let i = 0; i < 3; i++) {
+    const on = h("input", { type: "checkbox" }); on.checked = F[`al${i}On`].v;
+    on.onchange = () => setv({ [`al${i}On`]: on.checked });
+    const t = h("input", { type: "time", value: `${String(F[`al${i}H`].v).padStart(2, "0")}:${String(F[`al${i}M`].v).padStart(2, "0")}` });
+    t.onchange = () => { const [hh, mm] = t.value.split(":").map(Number); setv({ [`al${i}H`]: hh, [`al${i}M`]: mm, [`al${i}On`]: true }); on.checked = true; };
+    let mask = F[`al${i}D`].v;
+    const days = h("div", { class: "days" }, DAY.map((d, b) => h("button", { "aria-pressed": String(!!(mask >> b & 1)), title: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][b], onclick: e => {
+      mask ^= 1 << b; e.target.setAttribute("aria-pressed", String(!!(mask >> b & 1))); setv({ [`al${i}D`]: mask }); } }, d)));
+    al.append(h("div", { class: "row", style: "padding:8px 0;border-top:1px solid var(--line);gap:10px" }, h("label", { class: "sw" }, on, h("span")), t, h("span", { style: "margin-left:auto" }, days)));
+  }
+  al.append(h("p", { class: "small mute" }, "No days selected = rings once. Alarms ring even with the buzzer muted; any button stops them."));
+  // timer + pomodoro (live)
+  const live = h("div", { class: "card" });
+  const mins = h("input", { type: "number", min: 1, max: 600, value: F.timerMin.v, style: "width:80px" });
+  const drawLive = async () => {
+    const d = await call("desk.status");
+    const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    live.replaceChildren(h("h3", {}, "Timer & Pomodoro"),
+      h("div", { class: "field" }, h("label", {}, "Timer"), h("span", { class: "ctl" },
+        d.timerLeft ? h("b", {}, fmt(d.timerLeft)) : mins, h("span", { class: "mute small" }, d.timerLeft ? "left" : "min"),
+        h("button", { class: "btn", onclick: async () => { await call("timer", { minutes: d.timerLeft ? 0 : +mins.value }); drawLive(); } }, d.timerLeft ? "Stop" : "Start"))),
+      h("div", { class: "field" }, h("label", {}, "Pomodoro"), h("span", { class: "ctl" },
+        h("span", {}, d.pom.phase === "idle" ? "ready" : `${d.pom.phase} ${fmt(d.pom.left)}${d.pom.running ? "" : " (paused)"}`))),
+      h("div", { class: "row" },
+        ...[["toggle", d.pom.running ? "Pause" : "Start"], ["skip", "Skip"], ["reset", "Reset"]].map(([a, l]) => h("button", { class: "btn", onclick: async () => { await call("pomodoro", { action: a }); drawLive(); } }, l)),
+        h("span", { class: "mute small" }, `${d.pom.today} done today`)));
+  };
+  drawLive(); PAGES.desk.onStatus = drawLive;
+  // notifications
+  const nt = h("div", { class: "card" }, h("h3", {}, "Notifications"));
+  const title = h("input", { type: "text", placeholder: "Title", maxlength: 23, style: "width:90px" });
+  const text = h("input", { type: "text", placeholder: "Message", maxlength: 99, style: "flex:1" });
+  const list = h("div", { class: "list" });
+  const drawList = async () => { const r = await call("notify.list"); list.replaceChildren(...(r.notes.length ? r.notes.map(n => h("div", { class: "li" }, h("b", {}, n.title), h("span", { class: "grow mute" }, n.text), h("span", { class: "small mute" }, n.src))) : [h("p", { class: "empty" }, "Inbox is empty.")])); };
+  nt.append(h("div", { class: "row", style: "margin-bottom:8px" }, title, text, h("button", { class: "btn", onclick: async () => { if (!text.value && !title.value) return; await call("notify", { title: title.value, text: text.value }); text.value = ""; drawList(); } }, "Send")),
+    list, h("div", { class: "row", style: "margin-top:8px" }, h("button", { class: "mini", onclick: async () => { await call("notify.clear"); drawList(); } }, "Clear inbox"),
+    h("button", { class: "mini", onclick: () => call("ring") }, "Find my Potahto")));
+  drawList();
+  // desk guard + tripwire (background services on the device)
+  const guard = h("div", { class: "card" });
+  const gStat = h("div", { class: "row", style: "margin-bottom:6px" });
+  const drawGuardStat = async () => {
+    const w = await call("watch");
+    gStat.replaceChildren(
+      h("span", { class: "pill" }, h("span", { class: "dot " + (w.guard ? "ok" : "") }), "Guard: " + w.guardState),
+      h("button", { class: "btn" + (w.guard ? "" : " pri"), onclick: async () => { await call("watch", { guard: !w.guard }); drawGuardStat(); } }, w.guard ? "Disarm" : "Arm"),
+      h("span", { class: "pill" }, h("span", { class: "dot " + (w.tripped ? "bad" : w.trip ? "ok" : "") }), "Tripwire: " + (w.tripped ? "TRIPPED" : w.trip ? "armed" : "off")),
+      h("button", { class: "btn", onclick: async () => { await call("watch", { trip: !w.trip }); drawGuardStat(); } }, w.trip ? "Disarm" : "Arm"),
+      w.mm != null ? h("span", { class: "small mute" }, `${Math.round(w.mm / 10)} cm away`) : "",
+      w.last ? h("span", { class: "small mute", style: "flex-basis:100%" }, "Last: " + w.last) : "");
+  };
+  const testBtn = f => h("button", { class: "mini", onclick: async () => {
+    const t = await call("macro.run", { macro: f.v, delay: 3000 }); if (!t.ok) return toast(t.err);
+    for (let n = 3; n > 0; n--) { toast(`Switch to the PC… ${n}`, 1100); await sleep(1000); } toast("Sent via " + t.route); } }, "Test");
+  const mrow = (k, hint) => h("div", { class: "field" }, h("label", { class: "full" }, F[k].l, h("span", { class: "small mute" }, "  " + hint), testBtn(F[k])), h("div", { class: "full" }, macroInput(F[k])));
+  guard.append(h("h3", {}, "Desk Guard"), gStat,
+    h("p", { class: "small mute" }, "Runs in the background, also with the screen off or locked (hold SELECT on the device). Arm it here or in Desk › Desk Guard."),
+    h("div", { class: "field" }, h("label", {}, "Mode"), control(F.dgMode)),
+    h("div", { class: "field" }, h("label", {}, F.dgDist.l), control(F.dgDist)),
+    h("div", { class: "field" }, h("label", {}, F.dgDelay.l), control(F.dgDelay)),
+    mrow("dgLeaveM", "seat mode"), mrow("dgBackM", "seat mode"),
+    h("div", { class: "field" }, h("label", {}, F.dgNear.l), control(F.dgNear)),
+    mrow("dgNearM", "watch mode: aim the sensor at the door / behind you"),
+    h("p", { class: "small mute" }, "Ideas: ", h("code", {}, "{alt+tab}"), " ", h("code", {}, "{win+d}"), " ", h("code", {}, "{run chrome}"), " ", h("code", {}, "{win+l}"), " ", h("code", {}, "{media playpause}"), " ", h("code", {}, "{pc nircmd mutesysvolume 1}"), "."));
+  drawGuardStat();
+  // companion
+  const comp = h("div", { class: "card" }, h("h3", {}, "PC companion"),
+    h("p", { class: "small" }, "Feeds PC Monitor, keeps the clock synced, switches macro profiles to the app you're in, runs {pc ...} macros and lets scripts send notifications. USB, WiFi or Bluetooth."),
+    h("pre", { class: "code" }, "pip install psutil pyserial bleak     # bleak only for --ble\npython potahto_companion.py                  # USB (auto)\npython potahto_companion.py --ble            # Bluetooth\npython potahto_companion.py --wifi potahto.local --pin <PIN>\npython potahto_companion.py --allow-run      # let {pc ...} macros run commands\npython potahto_companion.py --notify \"Build done\""),
+    COMPANION ? h("button", { class: "btn", onclick: () => { const a = h("a", { href: URL.createObjectURL(new Blob([COMPANION], { type: "text/x-python" })), download: "potahto_companion.py" }); a.click(); } }, "Download script") : h("p", { class: "small mute" }, "Also in the sketch folder: companion/potahto_companion.py"));
+  g.append(al, live, guard, nt, comp);
+  PAGES.desk.onStatus = () => { drawLive(); drawGuardStat(); };
+});
+
+// ---- Music / Composer
+const NOTE_NM = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"];
+function rtttlParse(t) {
+  const [name, defs, notes] = t.split(":");
+  if (notes == null) throw new Error("Format is name:d=4,o=5,b=120:notes");
+  let d = 4, o = 6, b = 63;
+  for (const kv of defs.split(",")) { const [k, v] = kv.trim().split("="); if (!k) continue; if (k === "d") d = +v; else if (k === "o") o = +v; else if (k === "b") b = +v; }
+  const out = [];
+  for (let tok of notes.split(",")) {
+    tok = tok.trim().toLowerCase(); if (!tok) continue;
+    const m = tok.match(/^(\d*)([a-gp])(#|_)?(\.)?(\d)?(\.)?$/);
+    if (!m) throw new Error("Can't read note “" + tok + "”");
+    const len = +(m[1] || d), dot = !!(m[4] || m[6]);
+    if (m[2] === "p") { out.push({ m: 0, len, dot }); continue; }
+    let semi = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 }[m[2]] + (m[3] === "#" ? 1 : m[3] === "_" ? -1 : 0);
+    const oct = +(m[5] || o);
+    out.push({ m: 12 * (oct + 1) + semi, len, dot });
+  }
+  return { name: name.trim() || "Song", bpm: b, notes: out };
+}
+function rtttlWrite(sg) {
+  return `${sg.name || "Song"}:d=4,o=5,b=${sg.bpm}:` + sg.notes.map(n => {
+    const L = n.len === 4 ? "" : n.len;
+    if (!n.m) return `${L}p${n.dot ? "." : ""}`;
+    const o = Math.floor(n.m / 12) - 1;
+    return `${L}${NOTE_NM[n.m % 12]}${n.dot ? "." : ""}${o === 5 ? "" : o}`;
+  }).join(",");
+}
+const dur32 = n => 32 / n.len * (n.dot ? 1.5 : 1);
+let AUDIO = null;
+function previewSong(sg, onDone) {
+  AUDIO ||= new (window.AudioContext || window.webkitAudioContext)();
+  const ctx = AUDIO, g = ctx.createGain(); g.gain.value = 0.06; g.connect(ctx.destination);
+  let t = ctx.currentTime + 0.05; const whole = 240 / sg.bpm;
+  for (const n of sg.notes) {
+    const d = whole / n.len * (n.dot ? 1.5 : 1);
+    if (n.m) { const o = ctx.createOscillator(); o.type = "square"; o.frequency.value = 440 * 2 ** ((n.m - 69) / 12); o.connect(g); o.start(t); o.stop(t + d * 0.88); }
+    t += d;
+  }
+  const ms = (t - ctx.currentTime) * 1000; setTimeout(() => onDone && onDone(), ms);
+  return () => { try { g.disconnect(); } catch {} };
+}
+page("music", "Music", async root => {
+  const sc = await call("schema");
+  const F = Object.fromEntries(sc.fields.map(f => [f.k, f]));
+  let lib = await call("song.list");
+  let song = { name: "My song", bpm: 120, notes: [{ m: 72, len: 4, dot: false }, { m: 76, len: 4, dot: false }, { m: 79, len: 4, dot: false }, { m: 84, len: 2, dot: false }] };
+  let slot = 0, len = 8, dot = false, undo = [], stopPrev = null;
+  const LOW = 48, HIGH = 96, ROW = 9, COL = 7;           // C3..C7, 1/32 per 7 px... per 1/16 = 14px
+  head(root, "Music & composer");
+  const g = h("div", { class: "grid music" }); root.append(g);
+  const listCard = h("div", { class: "card" });
+  const ed = h("div", { class: "card" });
+  g.append(listCard, ed);
+  const toneSel = (k, label) => h("div", { class: "field" }, h("label", {}, label), control(F[k]));
+  async function refreshLib() { lib = await call("song.list"); SONGS = null; drawList(); }
+  function drawList() {
+    const row = (x, builtin) => h("div", { class: "li" },
+      h("span", { class: "grow" }, x.name),
+      h("button", { class: "mini", title: "Play on Potahto", onclick: () => call("song.play", { slot: x.slot }) }, "▶"),
+      h("button", { class: "mini", onclick: () => { try { load(rtttlParse(x.rtttl), builtin ? 0 : x.slot); if (builtin) song.name += " copy"; } catch (e) { toast(e.message); } } }, builtin ? "Copy" : "Edit"),
+      builtin ? null : h("button", { class: "mini", onclick: async () => { if (!confirm(`Delete “${x.name}”?`)) return; await call("song.del", { slot: x.slot }); refreshLib(); } }, "×"));
+    listCard.replaceChildren(h("h3", {}, "Your songs", h("span", { class: "small mute" }, `${lib.songs.length}/${lib.max}`)),
+      h("div", { class: "list" }, ...(lib.songs.length ? lib.songs.map(x => row(x, false)) : [h("p", { class: "empty" }, "None yet. Compose one, or paste a ringtone.")])),
+      h("div", { class: "row", style: "margin:8px 0 14px" }, h("button", { class: "btn", onclick: () => load({ name: "My song " + (lib.songs.length + 1), bpm: 120, notes: [] }, 0) }, "New song"),
+        h("button", { class: "btn", onclick: () => call("song.play", { stop: true }) }, "Stop")),
+      h("h3", {}, "Tones"), toneSel("songAlarm", "Alarm"), toneSel("songTimer", "Timer"), toneSel("songNtf", "Message"), toneSel("songBoot", "Boot tune"),
+      h("h3", { style: "margin-top:14px" }, "Built-in"),
+      h("div", { class: "list" }, lib.builtin.map(x => row(x, true))));
+  }
+  const canvas = h("canvas", { height: (HIGH - LOW + 1) * ROW, style: "display:block;cursor:crosshair" });
+  const scroller = h("div", { style: "overflow:auto;max-height:430px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)" }, canvas);
+  const nameIn = h("input", { type: "text", maxlength: 23, style: "width:160px" });
+  const bpmIn = h("input", { type: "number", min: 40, max: 300, style: "width:70px" });
+  const rt = h("textarea", { spellcheck: "false", style: "min-height:70px" });
+  const info = h("span", { class: "small mute" });
+  const lenSeg = h("div", { class: "seg" });
+  const dotSw = h("input", { type: "checkbox" });
+  nameIn.oninput = () => { song.name = nameIn.value.replace(/[:,]/g, ""); syncText(); };
+  bpmIn.oninput = () => { song.bpm = Math.max(40, Math.min(300, +bpmIn.value || 120)); syncText(); };
+  dotSw.onchange = () => dot = dotSw.checked;
+  rt.onchange = () => { try { load(rtttlParse(rt.value), slot); toast("Loaded"); } catch (e) { toast(e.message, 3000); } };
+  function drawLen() { lenSeg.replaceChildren(...[1, 2, 4, 8, 16, 32].map(L => h("button", { "aria-pressed": String(L === len), onclick: () => { len = L; drawLen(); } }, "1/" + L))); }
+  function syncText() { rt.value = rtttlWrite(song); const ms = song.notes.reduce((a, n) => a + 240000 / song.bpm / n.len * (n.dot ? 1.5 : 1), 0); info.textContent = `${song.notes.length}/${lib.maxNotes} notes · ${(ms / 1000).toFixed(1)} s`; }
+  function render() {
+    const total = song.notes.reduce((a, n) => a + dur32(n), 0);
+    const w = Math.max(scroller.clientWidth || 600, (total + 64) * COL / 2 + 40);
+    canvas.width = w;
+    const c = canvas.getContext("2d"), css = getComputedStyle(document.body);
+    const ink = css.getPropertyValue("--ink"), line = css.getPropertyValue("--line"), acc = css.getPropertyValue("--acc"), panel = css.getPropertyValue("--panel");
+    c.clearRect(0, 0, w, canvas.height);
+    for (let m = LOW; m <= HIGH; m++) {                   // rows: black keys shaded, C labelled
+      const y = (HIGH - m) * ROW;
+      if ([1, 3, 6, 8, 10].includes(m % 12)) { c.fillStyle = line; c.globalAlpha = .5; c.fillRect(0, y, w, ROW); c.globalAlpha = 1; }
+      if (m % 12 === 0) { c.fillStyle = ink; c.font = "9px sans-serif"; c.fillText("C" + (m / 12 - 1), 2, y + ROW - 1); }
+    }
+    for (let t = 0; t < w / (COL / 2); t += 8) { c.fillStyle = line; c.fillRect(30 + t * COL / 2, 0, t % 32 ? 1 : 2, canvas.height); }
+    let t = 0;
+    song.notes.forEach((n, i) => {
+      const x = 30 + t * COL / 2, d = dur32(n) * COL / 2;
+      if (n.m) { const y = (HIGH - Math.max(LOW, Math.min(HIGH, n.m))) * ROW; c.fillStyle = acc; c.fillRect(x + 1, y + 1, d - 2, ROW - 2); }
+      else { c.fillStyle = ink; c.globalAlpha = .25; c.fillRect(x + 1, canvas.height - 5, d - 2, 3); c.globalAlpha = 1; }
+      t += dur32(n);
+    });
+    c.fillStyle = acc; c.globalAlpha = .4; c.fillRect(30 + t * COL / 2, 0, 2, canvas.height); c.globalAlpha = 1;
+  }
+  canvas.onclick = e => {
+    const r = canvas.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    const t32 = Math.max(0, (x - 30) / (COL / 2)), m = HIGH - Math.floor(y / ROW);
+    undo.push(JSON.stringify(song.notes)); if (undo.length > 50) undo.shift();
+    let t = 0;
+    for (const n of song.notes) {                         // inside an existing note: re-pitch, or clear it
+      const d = dur32(n);
+      if (t32 >= t && t32 < t + d) {
+        if (n.m === m || e.shiftKey) n.m = 0; else n.m = m;
+        if (n.m) previewSong({ bpm: song.bpm, notes: [{ ...n }] });
+        syncText(); render(); return;
+      }
+      t += d;
+    }
+    if (song.notes.length >= lib.maxNotes) return toast("512 notes max");
+    let gap = Math.floor(t32 / (32 / len)) * (32 / len) - t;   // fill a gap with rests
+    for (const L of [1, 2, 4, 8, 16, 32]) while (gap >= 32 / L - 0.01) { song.notes.push({ m: 0, len: L, dot: false }); gap -= 32 / L; }
+    const n = { m, len, dot }; song.notes.push(n); previewSong({ bpm: song.bpm, notes: [n] });
+    syncText(); render();
+  };
+  function load(sg, s) {
+    song = sg; slot = s; nameIn.value = song.name; bpmIn.value = song.bpm; undo = []; syncText(); render();
+    ed.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  const playBtn = h("button", { class: "btn", onclick: () => {
+    if (stopPrev) { stopPrev(); stopPrev = null; playBtn.textContent = "Preview here"; return; }
+    stopPrev = previewSong(song, () => { stopPrev = null; playBtn.textContent = "Preview here"; }); playBtn.textContent = "Stop preview"; } }, "Preview here");
+  async function saveSong() {
+    if (!song.notes.length) return toast("Add some notes first");
+    const r = await call("song.set", { slot, rtttl: rtttlWrite(song) }, 8000);
+    if (!r.ok) return toast(r.err, 4000);
+    slot = r.slot; toast(`Saved (${r.notes} notes)`); refreshLib(); return slot;
+  }
+  ed.append(h("h3", {}, "Composer", info),
+    h("div", { class: "row", style: "margin-bottom:8px" }, h("span", { class: "mute small" }, "Name"), nameIn, h("span", { class: "mute small" }, "Tempo"), bpmIn, h("span", { class: "mute small" }, "BPM")),
+    h("div", { class: "row", style: "margin-bottom:8px" }, h("span", { class: "mute small" }, "Note"), lenSeg, h("label", { class: "sw" }, dotSw, h("span")), h("span", { class: "small" }, "dotted"),
+      h("button", { class: "mini", onclick: () => { song.notes.push({ m: 0, len, dot }); syncText(); render(); } }, "+ rest"),
+      h("button", { class: "mini", onclick: () => { if (undo.length) { song.notes = JSON.parse(undo.pop()); syncText(); render(); } } }, "Undo"),
+      h("button", { class: "mini", onclick: () => { song.notes.pop(); syncText(); render(); } }, "Delete last"),
+      h("button", { class: "mini", onclick: () => { if (confirm("Clear all notes?")) { undo.push(JSON.stringify(song.notes)); song.notes = []; syncText(); render(); } } }, "Clear")),
+    scroller,
+    h("p", { class: "small mute" }, "Click to add a note at that time and pitch (the length above). Click a note to move it to another pitch, click it again (or Shift+click) to make it a rest. Up to 512 notes."),
+    h("div", { class: "row", style: "margin:8px 0" }, playBtn,
+      h("button", { class: "btn", onclick: () => call("song.play", { rtttl: rtttlWrite(song) }) }, "Play on Potahto"),
+      h("button", { class: "btn pri", onclick: saveSong }, "Save to Potahto"),
+      h("select", { onchange: async e => { const k = e.target.value; e.target.value = ""; if (!k) return; const sl = await saveSong(); if (sl) { await call("set", { values: { [k]: sl } }); F[k].v = sl; toast("Set as " + e.target.selectedOptions[0]?.text); drawList(); } } },
+        h("option", { value: "" }, "Save & use as…"), h("option", { value: "songAlarm" }, "alarm tone"), h("option", { value: "songTimer" }, "timer tone"), h("option", { value: "songNtf" }, "message tone"), h("option", { value: "songBoot" }, "boot tune"))),
+    h("div", { class: "small mute", style: "margin:10px 0 4px" }, "RTTTL (Nokia ringtone format): paste one here to import it, or copy yours out."), rt);
+  drawLen(); drawList(); load(song, 0);
+});
+
+// ---- Toolkit
+page("toolkit", "Toolkit", async root => {
+  head(root, "Wireless toolkit");
+  root.append(h("p", { class: "small mute", style: "margin-top:-6px" }, "Diagnostics for your own networks and devices."));
+  const g = h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fit,minmax(330px,1fr))" }); root.append(g);
+  let alive = true; PAGES.toolkit.onLeave = () => { alive = false; call("ble.scan", { on: false }).catch(() => {}); };
+
+  // WiFi survey
+  const wifi = h("div", { class: "card" }, h("h3", {}, "WiFi networks"));
+  const wList = h("div", { class: "list" }), chart = h("div", { style: "display:flex;align-items:flex-end;gap:4px;height:70px;margin:8px 0 2px" });
+  const chLbl = h("div", { style: "display:flex;gap:4px" });
+  wifi.append(h("div", { class: "row" }, h("button", { class: "btn", onclick: scanWifi }, "Scan")), chart, chLbl, h("div", { class: "small mute", id: "bestch" }), wList);
+  async function scanWifi() {
+    wList.replaceChildren(h("p", { class: "empty" }, "Scanning…"));
+    await call("wifi.scan");
+    for (let t = 0; t < 20 && alive; t++) {
+      await sleep(700);
+      const r = await call("wifi.list");
+      if (r.state < 0) continue;
+      const score = Array(14).fill(0);
+      r.aps.forEach(a => { for (let c = 1; c <= 13; c++) { const d = Math.abs(c - a.ch); if (d <= 2) score[c] += Math.max(0, a.rssi + 100) * [1, .7, .3][d]; } });
+      const mx = Math.max(1, ...score.slice(1)); const best = [1, 6, 11].reduce((b, c) => score[c] < score[b] ? c : b, 1);
+      chart.replaceChildren(...score.slice(1).map((v, i) => h("div", { title: `ch ${i + 1}`, style: `flex:1;height:${4 + 66 * v / mx}px;border-radius:4px 4px 0 0;background:${i + 1 === best ? "var(--ok)" : "var(--acc)"};opacity:${i + 1 === best ? 1 : .75}` })));
+      chLbl.replaceChildren(...score.slice(1).map((_, i) => h("div", { class: "small mute", style: "flex:1;text-align:center" }, i + 1)));
+      const bc = $("#bestch"); if (bc) bc.textContent = `Least crowded of 1/6/11: channel ${best}`;
+      wList.replaceChildren(...r.aps.map(a => h("div", { class: "li" }, rssiBars(a.rssi), h("span", { class: "grow" }, a.ssid), h("span", { class: "small mute" }, `${a.rssi} dBm · ch ${a.ch}${a.open ? " · open" : ""}`))));
+      return;
+    }
+  }
+
+  // BLE
+  const ble = h("div", { class: "card" }, h("h3", {}, "Bluetooth LE nearby"));
+  const bList = h("div", { class: "list" }, h("p", { class: "empty" }, "Listening…"));
+  ble.append(bList);
+  (async () => {
+    await call("ble.scan", { on: true });
+    while (alive && app.page === "toolkit") {
+      const r = await call("ble.list");
+      bList.replaceChildren(...(r.devices.length ? r.devices.slice(0, 25).map(d => h("div", { class: "li" }, rssiBars(d.rssi),
+        h("span", { class: "grow" }, d.name || d.vendor || (d.vendorId ? `vendor 0x${d.vendorId.toString(16)}` : d.addr)),
+        d.kind ? h("span", { class: "tag" }, d.kind) : null, h("span", { class: "small mute" }, `${d.rssi} dBm`))) : [h("p", { class: "empty" }, "Nothing heard yet.")]));
+      await sleep(2000);
+    }
+  })();
+
+  // LAN
+  const lan = h("div", { class: "card" }, h("h3", {}, "Devices on your network"));
+  const lList = h("div", { class: "list" }), lProg = h("div", { class: "prog", style: "margin:8px 0" }, h("div"));
+  lan.append(h("div", { class: "row" }, h("button", { class: "btn", onclick: scanLan }, "Discover"), h("span", { class: "small mute" }, "via mDNS / Bonjour")), lProg, lList);
+  async function scanLan() {
+    const s = await call("lan.scan"); if (!s.ok) return toast(s.err);
+    while (alive) {
+      await sleep(1000);
+      const r = await call("lan.list");
+      lProg.firstChild.style.width = r.progress + "%";
+      lList.replaceChildren(...r.hosts.map(x => h("div", { class: "li" }, h("span", { class: "grow" }, x.host), h("span", { class: "tag" }, x.type), h("span", { class: "small mute mono" }, x.ip))));
+      if (!r.scanning) { if (!r.hosts.length) lList.replaceChildren(h("p", { class: "empty" }, "Nothing announced itself.")); break; }
+    }
+  }
+
+  // Net doctor
+  const doc = h("div", { class: "card" }, h("h3", {}, "Net Doctor"));
+  const dList = h("div", { class: "list" });
+  doc.append(h("div", { class: "row" }, h("button", { class: "btn", onclick: runDoc }, "Run checks")), dList);
+  async function runDoc() {
+    await call("doctor.run");
+    while (alive) {
+      await sleep(800);
+      const r = await call("doctor.status");
+      const icon = { ok: "dot ok", warn: "dot warn", fail: "dot bad", pending: "dot" };
+      dList.replaceChildren(...r.steps.map(s => h("div", { class: "li" }, h("span", { class: icon[s.state] }), h("span", { class: "grow" }, s.name), h("span", { class: "small mute" }, s.note || (s.state === "pending" ? "…" : "")))));
+      if (!r.running) break;
+    }
+  }
+
+  // Wake-on-LAN
+  const wol = h("div", { class: "card" }, h("h3", {}, "Wake-on-LAN"));
+  const wr = await call("wol.get");
+  const devs = wr.devices;
+  const wBody = h("div");
+  const drawWol = () => wBody.replaceChildren(...devs.map((d, i) => {
+    const n = h("input", { type: "text", value: d.name, maxlength: 19, placeholder: "Name", style: "width:110px" }); n.oninput = () => d.name = n.value;
+    const m = h("input", { type: "text", value: d.mac, placeholder: "AA:BB:CC:DD:EE:FF", class: "mono", style: "flex:1;min-width:150px" }); m.oninput = () => d.mac = m.value;
+    return h("div", { class: "row", style: "margin-bottom:6px" }, n, m,
+      h("button", { class: "mini", onclick: async () => { const r = await call("wol.send", { i }); toast(r.ok ? "Magic packet sent" : r.err); } }, "Wake"),
+      h("button", { class: "mini", onclick: () => { devs.splice(i, 1); drawWol(); } }, "×"));
+  }));
+  drawWol();
+  wol.append(wBody, h("div", { class: "row" },
+    h("button", { class: "btn", onclick: () => { if (devs.length >= wr.max) return toast(`Up to ${wr.max}`); devs.push({ name: "PC", mac: "" }); drawWol(); } }, "Add PC"),
+    h("button", { class: "btn pri", onclick: async () => { const r = await call("wol.set", { devices: devs }); toast(r.ok ? "Saved" : r.err); } }, "Save")),
+    h("p", { class: "small mute" }, "Enable Wake-on-LAN in the PC's BIOS and network adapter settings. Saved PCs also appear in Wireless › Wake PC."));
+  g.append(wifi, ble, lan, doc, wol);
+  scanWifi();
+});
+
+const PREF = ["dash", "settings", "wifi", "macros", "desk", "smart", "music", "toolkit", "games", "backup", "fw"];
+PAGE_ORDER.sort((a, b) => ((PREF.indexOf(a) + 1) || 99) - ((PREF.indexOf(b) + 1) || 99));
+initConnect();
+</script>
+</body>
+</html>
