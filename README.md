@@ -6,6 +6,13 @@ It started as "make the air mouse work" and kept growing. Most of the effort wen
 
 Current version: 1.3.0. Built and tested with the esp32 Arduino core 3.3.12.
 
+<table>
+<tr><td align="center"><img src="docs/screens/menu_carousel.png" width="250" alt="Main menu"><br><sub>Main menu</sub></td><td align="center"><img src="docs/screens/macro_folder.png" width="250" alt="Macro Pad, VS Code folder"><br><sub>Macro Pad, VS Code folder</sub></td><td align="center"><img src="docs/screens/desk_guard_away.png" width="250" alt="Desk Guard"><br><sub>Desk Guard</sub></td></tr>
+<tr><td align="center"><img src="docs/screens/lock_code.png" width="250" alt="Lock screen"><br><sub>Lock screen</sub></td><td align="center"><img src="docs/screens/music_composer.png" width="250" alt="Buzzer composer"><br><sub>Buzzer composer</sub></td><td align="center"><img src="docs/screens/spud_defense.png" width="250" alt="Spud Defense"><br><sub>Spud Defense</sub></td></tr>
+</table>
+
+These are the real firmware screens, captured from the PC simulator in `_dev/oled`. There are more in [docs/SCREENS.md](docs/SCREENS.md).
+
 ## What it does
 
 The menu is a carousel of folders.
@@ -26,9 +33,11 @@ There's also a web app for everything that's annoying to do with five buttons. T
 
 ## Hardware
 
+The full parts list, wiring and assembly steps are in the **[build guide](docs/BUILD.md)**. The short version:
+
 | Part | Notes |
 |------|-------|
-| Seeed XIAO ESP32-S3 | the non-Sense version is fine |
+| Seeed XIAO ESP32-S3 | the non-Sense version is fine (the buzzer and LED pins are on the back, see the build guide) |
 | SSD1306 OLED, 128x64, I2C | `0x3C` |
 | MPU6050 | `0x68` |
 | HMC5883L or QMC5883L compass | auto-detected (`0x1E` / `0x0D`) |
@@ -52,7 +61,7 @@ There's also a web app for everything that's annoying to do with five buttons. T
 
 GPIO43/44 are the UART pins, but serial runs over native USB, so they're free for buttons. GPIO3 is a strapping pin, so don't hold LEFT while powering up. If your buttons go to 3V3 instead of GND, set `BTN_ACTIVE_LOW 0` in `Config.h`. If your motor uses a low-side NPN/MOSFET, set `MOTOR_ACTIVE_LOW 0`.
 
-## Building it
+## Flashing the firmware
 
 Arduino IDE with the esp32 core 3.x (tested on 3.3.12). Board settings:
 
@@ -93,6 +102,10 @@ The lock screen can be off, a clock, or a code (4 to 6 presses of UP/DOWN/LEFT/R
 
 Deep sleep kicks in after 30 min of screen-off (or from Power > Deep sleep). Only UP, DOWN and LEFT can wake it because those are the RTC pins. The clock keeps running and alarms still wake it. It won't deep sleep while something needs to stay awake, like an armed Tripwire, a running timer, USB plugged into a PC or WiFi set to Always on.
 
+<table>
+<tr><td align="center"><img src="docs/screens/power_hold_to_sleep.png" width="250" alt="Hold SELECT: screen off"><br><sub>Hold SELECT: screen off</sub></td><td align="center"><img src="docs/screens/lock_clock.png" width="250" alt="Clock lock screen"><br><sub>Clock lock screen</sub></td><td align="center"><img src="docs/screens/power_app.png" width="250" alt="Power app"><br><sub>Power app</sub></td></tr>
+</table>
+
 ## WiFi, Bluetooth and time
 
 Join networks on the device (Settings > WiFi > Join a network, with an on-screen keyboard) or from the web app. Up to 5 are saved. Campus or office WiFi that asks for a username and password while connecting (WPA2-Enterprise, PEAP or TTLS) works; the kind that opens a login web page doesn't.
@@ -105,6 +118,10 @@ WiFi modes:
 Bluetooth pairs once as a combined keyboard, mouse and media remote called "Potahto". With "Send keys via" on Auto, whichever connection came last wins, so plugging in USB or connecting over Bluetooth just does the right thing. In Air Mouse, hold UP to switch by hand.
 
 The clock doesn't need WiFi. It takes the time from NTP, from the web app or companion over USB or Bluetooth, from an iPhone (Bluetooth Current Time Service), or you set it by hand.
+
+<table>
+<tr><td align="center"><img src="docs/screens/settings.png" width="250" alt="Settings"><br><sub>Settings</sub></td><td align="center"><img src="docs/screens/wifi_keyboard.png" width="250" alt="Typing a WiFi password"><br><sub>Typing a WiFi password</sub></td><td align="center"><img src="docs/screens/settings_bluetooth.png" width="250" alt="Bluetooth"><br><sub>Bluetooth</sub></td></tr>
+</table>
 
 ## The control apps
 
@@ -139,6 +156,11 @@ Hello                     types the text (US layout)
 
 **Shutter.** A Bluetooth camera remote for phones, with self-timer, burst and wave-to-shoot over the ToF sensor.
 
+<table>
+<tr><td align="center"><img src="docs/screens/air_mouse.png" width="250" alt="Air Mouse"><br><sub>Air Mouse</sub></td><td align="center"><img src="docs/screens/presenter_laser.png" width="250" alt="Presenter with the laser on"><br><sub>Presenter with the laser on</sub></td><td align="center"><img src="docs/screens/macro_pad.png" width="250" alt="Macro Pad"><br><sub>Macro Pad</sub></td></tr>
+<tr><td align="center"><img src="docs/screens/macro_vscode.png" width="250" alt="VS Code profile"><br><sub>VS Code profile</sub></td><td align="center"><img src="docs/screens/macro_pointer.png" width="250" alt="Pointer hand-off (Snip)"><br><sub>Pointer hand-off (Snip)</sub></td><td align="center"><img src="docs/screens/shutter.png" width="250" alt="Shutter self-timer"><br><sub>Shutter self-timer</sub></td></tr>
+</table>
+
 ## Desk stuff
 
 - **Clock:** 3 alarms and a timer. They ring from any app, even with the screen off, and wake it from deep sleep.
@@ -147,6 +169,11 @@ Hello                     types the text (US layout)
 - **Desk Guard:** point the ToF sensor at your chair or behind you. In "guard my seat" mode it runs a macro when you leave (default Win+L) and another when you come back. In "watch behind me" mode it runs one when someone walks up (default Alt+Tab, but `{run chrome}` or anything else works). It keeps going after you leave the app.
 - **Tripwire:** a siren tuned to the buzzer's loudest frequency, plus the motor and LED. Any key silences it. If it trips while the screen is off and a code lock is set, it locks first so only you can silence it.
 - **Inbox:** notifications from the web app, Home Assistant or scripts.
+
+<table>
+<tr><td align="center"><img src="docs/screens/clock.png" width="250" alt="Clock"><br><sub>Clock</sub></td><td align="center"><img src="docs/screens/pomodoro.png" width="250" alt="Pomodoro"><br><sub>Pomodoro</sub></td><td align="center"><img src="docs/screens/pc_monitor.png" width="250" alt="PC Monitor"><br><sub>PC Monitor</sub></td></tr>
+<tr><td align="center"><img src="docs/screens/desk_guard_watch.png" width="250" alt="Desk Guard, watch mode"><br><sub>Desk Guard, watch mode</sub></td><td align="center"><img src="docs/screens/tripwire.png" width="250" alt="Tripwire armed"><br><sub>Tripwire armed</sub></td><td align="center"><img src="docs/screens/notification_banner.png" width="250" alt="Notification banner"><br><sub>Notification banner</sub></td></tr>
+</table>
 
 ### PC companion
 
@@ -169,9 +196,17 @@ From the web app's Smart page:
 - **Home Assistant:** turn on MQTT and Potahto shows up through discovery, with battery, temperature, WiFi signal, Tripwire and presence sensors, a Ring button, a Message box and a device trigger for every Smart Button press.
 - **Webhooks:** any URL, bound to Smart Button keys or to rules like "when Tripwire trips, call this".
 
+<table>
+<tr><td align="center"><img src="docs/screens/smart_button.png" width="250" alt="Smart Button"><br><sub>Smart Button</sub></td><td align="center"><img src="docs/screens/smart_status.png" width="250" alt="Smart Status"><br><sub>Smart Status</sub></td></tr>
+</table>
+
 ## Music
 
 Tools > Music plays songs on the buzzer and has a composer. There are 16 slots of up to 512 notes, plus 17 original built-in tunes (every game has its own theme). Songs are RTTTL, so old Nokia ringtones paste right in. The web app has a piano-roll editor. Any song can be the alarm, timer, message or boot tone.
+
+<table>
+<tr><td align="center"><img src="docs/screens/music_library.png" width="250" alt="Music library"><br><sub>Music library</sub></td><td align="center"><img src="docs/screens/music_composer.png" width="250" alt="Composer"><br><sub>Composer</sub></td><td align="center"><img src="docs/screens/loudest_tone.png" width="250" alt="Finding the loudest tone"><br><sub>Finding the loudest tone</sub></td></tr>
+</table>
 
 ## Wireless toolkit
 
@@ -182,6 +217,10 @@ For your own networks and devices only. Nothing in here attacks, jams or deauths
 - **Net Doctor:** checks link, gateway, DNS, internet and latency and tells you which one is broken.
 - **Wake PC:** Wake-on-LAN.
 
+<table>
+<tr><td align="center"><img src="docs/screens/wifi_channels.png" width="250" alt="Channel crowding"><br><sub>Channel crowding</sub></td><td align="center"><img src="docs/screens/wifi_hunter.png" width="250" alt="Signal hunter"><br><sub>Signal hunter</sub></td><td align="center"><img src="docs/screens/net_doctor.png" width="250" alt="Net Doctor"><br><sub>Net Doctor</sub></td></tr>
+</table>
+
 ## Games
 
 Three bigger originals made for this screen:
@@ -190,6 +229,10 @@ Three bigger originals made for this screen:
 - **Spud Defense:** tower defense, 4 gardens of 20 waves.
 
 Plus Snake, Pong, Tetris (hold it sideways), Flappy, a dungeon crawler and four sensor games: Tilt Maze, Tilt Race, Blaster (gyro aim) and Sonar (fly with your hand over the distance sensor).
+
+<table>
+<tr><td align="center"><img src="docs/screens/spud_knight.png" width="250" alt="Spud Knight"><br><sub>Spud Knight</sub></td><td align="center"><img src="docs/screens/tater_run.png" width="250" alt="Tater Run"><br><sub>Tater Run</sub></td><td align="center"><img src="docs/screens/spud_defense_build.png" width="250" alt="Spud Defense"><br><sub>Spud Defense</sub></td></tr>
+</table>
 
 ## Tuning after the first flash
 
@@ -204,6 +247,29 @@ Plus Snake, Pong, Tetris (hold it sideways), Flappy, a dungeon crawler and four 
 
 - **Buzzer volume:** a buzzer on a GPIO gets 3.3 V and a few tens of mA. The firmware already drives it as hard as it can at its resonant frequency. For real volume, drive it from the battery through a transistor: GPIO16 > 1k > NPN base (S8050 or 2N2222), emitter to GND, buzzer between VBAT and collector, with a diode across it if it's a magnetic buzzer.
 - **IR range:** same story. A GPIO pin can push maybe 40 mA through the LED, while a TV remote pulses 100 to 300 mA. GPIO9 > 1k > NPN (or an AO3400 MOSFET), with the LED and a 10 to 15 ohm resistor from VBAT. That goes from a couple of metres to across the room.
+
+## What's next
+
+Nothing here is promised, but this is roughly the order I want to do things in.
+
+**Soon**
+- Test everything on the real hardware and fix what breaks: deep sleep current, Bluetooth keyboard plus the data link at the same time, campus WiFi.
+- Prebuilt `.bin` files on the Releases page, so you can flash it without setting up the Arduino IDE.
+- Measure real battery life in each power mode and put the numbers here.
+
+**Hardware rev 2**
+- Transistor drivers for the buzzer and the IR LED (see the limits above). That's the biggest easy win for volume and range.
+- A proper enclosure and a small PCB instead of hand wiring.
+
+**Firmware ideas**
+- Macros for non-US keyboard layouts plus `{run}` / `{admin}` equivalents for macOS and Linux.
+- An IR code library (TVs, ACs, projectors) on top of record and replay.
+- Checking the campus WiFi certificate instead of trusting any server.
+- Switching between more than one paired Bluetooth host from the device.
+- Firmware updates from the web app straight from GitHub releases.
+- More games and a way to share songs and macro profiles.
+
+Ideas and pull requests are welcome.
 
 ## Code layout
 
@@ -225,6 +291,7 @@ Iot.* Notify.* Desk.*  smart home, notifications, alarms/timer/pomodoro
 WebApp.h               the web app, gzipped (generated)
 webapp/index.html      web app source
 companion/             PC companion script
+docs/                  build guide and screenshots
 _dev/                  test tools (simulators, unit tests), not part of the build
 ```
 
